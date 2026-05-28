@@ -1,0 +1,42 @@
+{
+  "name": "sbc",
+  "version": "1.0.0",
+  "description": "Ship stablecoin apps faster with SBC skills for Radius Network integration, gasless transactions, and account abstraction.",
+  "author": {
+    "name": "StableCoin",
+    "url": "https://stablecoin.xyz"
+  },
+  "homepage": "https://docs.stablecoin.xyz",
+  "keywords": [
+    "radius",
+    "stablecoin",
+    "sbc",
+    "account-abstraction",
+    "gasless",
+    "rusd",
+    "web3",
+    "payments"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SBC",
+    "shortDescription": "Build stablecoin apps with SBC AppKit on Radius",
+    "longDescription": "Use SBC skills to integrate Radius Network, enable gasless transactions via account abstraction, and build with SBC AppKit.",
+    "developerName": "StableCoin",
+    "category": "Engineering",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://docs.stablecoin.xyz",
+    "defaultPrompt": [
+      "Integrate Radius Network into my app",
+      "Add gasless transactions with SBC AppKit",
+      "Set up account abstraction on Radius",
+      "Migrate from Base to Radius"
+    ],
+    "composerIcon": "./assets/logo-square.svg",
+    "logo": "./assets/logo-square.svg",
+    "screenshots": []
+  }
+}

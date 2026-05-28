@@ -1,0 +1,17 @@
+{
+  "name": "sbc",
+  "owner": {
+    "name": "StableCoin"
+  },
+  "metadata": {
+    "description": "SBC's official skills for AI agents building on Radius Network with account abstraction",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "sbc-skills",
+      "source": "./plugins/sbc",
+      "description": "Ship stablecoin apps faster. Best-practice skills for Radius Network integration, gasless transactions, and SBC AppKit."
+    }
+  ]
+}

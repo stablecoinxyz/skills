@@ -1,0 +1,11 @@
+{
+  "name": "sbc",
+  "displayName": "SBC",
+  "version": "1.0.0",
+  "description": "Ship stablecoin apps faster. Best-practice skills for Radius Network integration, gasless transactions, and SBC AppKit.",
+  "author": {
+    "name": "StableCoin"
+  },
+  "keywords": ["radius", "stablecoin", "sbc", "account-abstraction", "gasless", "rusd", "web3", "payments"],
+  "logo": "assets/logo.svg"
+}
