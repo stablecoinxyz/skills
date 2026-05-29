@@ -1,226 +1,257 @@
 ---
 name: sbc-radius-integration
-description: Fully integrates Radius Network into the user's app using SBC AppKit (install, config, providers, env, wallet chain, gasless txs). Use when the user says integrate Radius, add Radius to my platform/app, Radius testnet/mainnet, RUSD, radiusTestnet, switch from Base to Radius, or any Radius + SBC account abstraction request. Executes autonomously—writes code and runs installs; only stops for a missing API key or ambiguous mainnet vs testnet in production.
+description: Integrates Radius with SBC AppKit and Para (useSbcPara). Use when the user says integrate Radius or Radius testnet. Runs npm install, creates .env.local, implements code—only asks the user to paste SBC and Para API keys (nothing else). No wallet address, no manual terminal steps for the user.
 ---
 
-# SBC Radius integration (autonomous)
+# SBC Radius integration (Para + AppKit)
 
-When the user asks to **integrate Radius** (or similar), **implement it in their repo**. Do not reply with a tutorial and stop. Follow this playbook end-to-end unless blocked.
+When the user asks to **integrate Radius**, **do everything yourself** in the terminal and codebase. The user may only say:
 
-## Agent mandate
+```text
+@sbc-radius-integration
+integrate radius
+```
 
-1. **Recon first** — read `package.json`, env files, existing web3/AA setup, app entry (`app/layout.tsx`, `main.tsx`, `_app.tsx`).
-2. **Choose path** — see decision tree below; default **AppKit + radiusTestnet**.
-3. **Execute** — install deps, create files from [templates/](templates/), wire providers, update `.env.example`, add optional demo component.
-4. **Migrate** — if Base/Base Sepolia is configured, switch chain + EntryPoint + account type per [reference.md](reference.md).
-5. **Verify** — run `npm run build` / `pnpm build` / `tsc --noEmit` when available; fix import paths and `"use client"` boundaries.
-6. **Report** — list files changed + **only** these human steps: paste API key, faucet for testnet.
+Do **not** reply with a tutorial. Do **not** tell the user to run `npm install`, `cp env.example`, or create files manually.
 
-**Stop and ask the user only if:**
+## One-shot experience (target)
 
-- No API key in env **and** you cannot add `.env.local` with a placeholder they must fill (one line).
-- They said "production" but did not say mainnet vs testnet (default testnet; ask once if deploying to real users).
-- Repo has no frontend and no clear backend entry (rare).
+| Who | Does what |
+| --- | --------- |
+| **User** | Pastes **SBC API key** and **Para API key** when asked (two messages max). Optionally clicks Connect in the browser after you say “done”. |
+| **Agent** | `npm install`, create `.env.local`, implement all code, `npm run build` or `tsc`, then tell user to open the app |
 
-**Never stop for:** "Should I create `radius.ts`?" — yes, create it.
+**Never ask the user for:** wallet address, private key, seed, or to run shell commands.
+
+**Test harness in this repo:** if workspace is `skills` root, `cd examples/radius-test-app` first. Integrate on `src/app/page.tsx`.
+
+**Default wallet:** **Para** via `@getpara/react-sdk` + `useSbcPara` from `@stablecoin.xyz/react` (same pattern as `dollar-wallet-web`, Para versions aligned with `agent-payments`).
+
+**Canonical references (read if unsure):**
+
+| Repo | What to copy |
+| ---- | ------------ |
+| `dollar-wallet-web` | `src/components/Providers.tsx`, `src/lib/para/hooks.ts`, `src/lib/sbc/hooks.ts` (`useSbcPara`) |
+| `agent-payments` | `apps/web/package.json` Para SDK versions (`@getpara/react-sdk@2.27.0`) |
+| SBC docs | https://docs.stablecoin.xyz/radius/overview |
+
+## Agent mandate (run in order)
+
+### Step 0 — Bootstrap (you run these, not the user)
+
+Detect app root (current dir or `examples/radius-test-app` in skills repo).
+
+```bash
+# If .env.local missing, create from example (env.example or env.radius.example)
+cp -n env.example .env.local 2>/dev/null || cp -n .env.example .env.local 2>/dev/null || true
+
+npm install
+# After adding packages to package.json:
+npm install
+```
+
+If `.env.local` has empty keys, **ask the user once**:
+
+> Paste your **SBC API key** (from dashboard.stablecoin.xyz).
+
+Write `NEXT_PUBLIC_SBC_API_KEY=...` into `.env.local`.
+
+Then:
+
+> Paste your **Para API key** (from developer.getpara.com).
+
+Write `NEXT_PUBLIC_PARA_API_KEY=...` into `.env.local`.
+
+Ensure these lines exist (add if missing):
+
+```env
+NEXT_PUBLIC_SBC_CHAIN=radiusTestnet
+```
+
+Do **not** ask the user to copy files or run `npm install` themselves.
+
+### Steps 1–4 — Implement
+
+1. **Recon** — `package.json`, app entry, existing Para/SBC setup.
+2. **Default path** — Para + `useSbcPara` + **radiusTestnet** (see [reference.md](reference.md)).
+3. **Execute** — copy/adapt [templates/](templates/), wire providers, connect UI on main page.
+4. **Verify** — `npx tsc --noEmit` or `npm run build`; fix `"use client"` / `dynamic` issues.
+
+### Step 5 — Done message (user does not run terminal)
+
+Tell the user only:
+
+1. Run **`npm run dev`** if you did not start the server — or say “dev server ready at http://localhost:3000” if you started it.
+2. Open the app → **Connect with Para**.
+3. Optional testnet faucet: https://testnet.radiustech.xyz/wallet
+
+**Stop and ask only for:** the two API keys (if not already in `.env.local`). Mainnet vs testnet if they said “production” ambiguously.
+
+**Never ask for:** wallet address, private key, or seed phrase up front.
+
+**Never stop for:** “Should I create `radius.ts`?” — yes.
 
 ## Decision tree
 
 ```
 User: integrate Radius
 │
-├─ Empty / new app folder requested?
-│   └─ YES → npx create-sbc-app <name> --chain radiusTestnet (or --chain radius)
-│            cd, install, dev. DONE unless they asked to add to existing monorepo package.
+├─ Greenfield / new app?
+│   └─ npx create-sbc-app <name> --template react-para --chain radiusTestnet
+│      (then set VITE_PARA_API_KEY / NEXT_PUBLIC_PARA_API_KEY + SBC key in .env)
 │
-├─ Already has @stablecoin.xyz/react or core?
-│   └─ YES → Path B (upgrade): bump to latest @stablecoin.xyz/*, swap chain to Radius templates
+├─ Already has Para + SBC?
+│   └─ Path B: swap chain to getRadiusChain(), update rpcUrl, keep useSbcPara
 │
-├─ Has Privy / wagmi / permissionless / Kernel-only AA?
-│   └─ YES → Path C (direct AA URL) + SimpleAccount + Radius EntryPoint; see templates/direct-aa-url.ts
-│            Prefer migrating to AppKit if the app has no deep Kernel lock-in.
+├─ Privy / wagmi / Kernel-only AA (no Para)?
+│   └─ Path C: templates/direct-aa-url.ts — prefer migrating to Para + AppKit if UI exists
 │
-└─ Default → Path A (AppKit embed in existing React/Next/Vite app)
+└─ Default Path A: ParaProvider + useSbcRadiusPara + Connect (templates)
 ```
 
-| Path | When | Packages |
-|------|------|----------|
-| **A** AppKit embed | Next/Vite/React with UI | `@stablecoin.xyz/react` `@stablecoin.xyz/core` `viem` (≥1.6.1 core) |
-| **B** Upgrade | Already SBC | Same packages, change chain config only |
-| **C** Direct AA | Custom AA stack | `viem` + their bundler client; URL below |
-| **Scaffold** | Greenfield | `npx create-sbc-app` |
+## Path A — Para + Radius (existing Next/Vite app)
 
-## Path A — step-by-step (existing app)
+### A1. Install
 
-### A1. Install (detect package manager)
+Match package manager. Pin Para to **2.27.x** (same family as `agent-payments`):
 
 ```bash
-# npm | pnpm | yarn — match repo
-npm install @stablecoin.xyz/react @stablecoin.xyz/core viem@^2 @turnkey/viem@^0.14 @turnkey/http@^3
+npm install @stablecoin.xyz/react @stablecoin.xyz/core viem@^2 \
+  @getpara/react-sdk@2.27.0 @getpara/viem-v2-integration@2.27.0 \
+  @tanstack/react-query@^5 \
+  @turnkey/viem@^0.14 @turnkey/http@^3
 ```
 
-Pin `@stablecoin.xyz/core` to **1.6.1+** if resolving versions (Radius legacy gas + receipt polling).
+Also: `import "@getpara/react-sdk/styles.css"` in the client provider file.
 
-**Next.js:** `@stablecoin.xyz/core` dynamically imports `@turnkey/viem` (optional peer). Install it anyway or the build fails with "Can't resolve '@turnkey/viem'".
+`@stablecoin.xyz/core` ≥ **1.6.1** for Radius gas + receipt polling.  
+**Next.js:** must install `@turnkey/viem` and `@turnkey/http` or build fails resolving dynamic imports.
 
-### A2. Create chain config
+### A2. Chain config
 
-Copy [templates/radius-chain.ts](templates/radius-chain.ts) → `src/config/radius.ts` or `lib/chains/radius.ts` (match project aliases).
+Copy [templates/radius-chain.ts](templates/radius-chain.ts) → `src/config/radius.ts`.
 
-### A3. Create SBC config
+Export `getRadiusChain()` and `getRadiusRpcUrl()` (default testnet).
 
-Copy [templates/sbc-radius-config.ts](templates/sbc-radius-config.ts) → `src/lib/sbc/config.ts` (adjust `@/` imports to project paths).
+### A3. Para config
 
-### A4. Provider wrapper
+Copy [templates/para-config.ts](templates/para-config.ts) → `src/lib/para/config.ts`.
 
-| Framework | Action |
-|-----------|--------|
-| **Next.js App Router** | Copy [templates/SbcProviders-next.tsx](templates/SbcProviders-next.tsx) → `src/components/providers/SbcProviders.tsx`. Demo/wallet UI: use a **client** loader with `next/dynamic` + `ssr: false` — never call `dynamic(..., { ssr: false })` from a Server Component page. In `app/layout.tsx`: wrap `{children}` only if the whole app needs SBC; otherwise scope provider to the demo route. |
-| **Next.js Pages** | Same provider; wrap in `pages/_app.tsx`. |
-| **Vite** | Copy [templates/vite-main.tsx.snippet](templates/vite-main.tsx.snippet) pattern into `src/main.tsx`. |
-| **CRA** | Wrap in `src/index.tsx`. |
+### A4. Para viem clients (Radius)
 
-### A5. Environment
+Copy [templates/use-para-viem-radius.ts](templates/use-para-viem-radius.ts) → `src/lib/para/hooks.ts`.
+
+### A5. SBC + Para hook
+
+Copy [templates/use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) → `src/lib/sbc/use-sbc-radius-para.ts`.
+
+### A6. Root providers (Next.js App Router)
+
+Copy [templates/ParaProviders-next.tsx](templates/ParaProviders-next.tsx) → `src/components/providers/ParaProviders.tsx`.
+
+- Wrap app in `app/layout.tsx` **or** only the route that needs wallet (e.g. `/demo/radius`).
+- Entire file must be `"use client"`.
+
+**Next.js wallet route:** use a **client** loader with `next/dynamic` + `ssr: false` for the connect panel — never `dynamic(..., { ssr: false })` inside a Server Component page. See [templates/RadiusParaConnectLoader.tsx](templates/RadiusParaConnectLoader.tsx).
+
+### A7. Connect UI
+
+Copy [templates/RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) → e.g. `src/components/RadiusParaConnect.tsx`.
+
+Uses `useModal` from Para for **Connect** / **Disconnect** and `useSbcRadiusPara` for smart account + test send.
+
+### A8. Environment
 
 Append [templates/env.example.snippet](templates/env.example.snippet) to `.env.example`.
 
-Create or update `.env.local`:
-
 ```env
-NEXT_PUBLIC_SBC_API_KEY=your_api_key_here
+NEXT_PUBLIC_SBC_API_KEY=
+NEXT_PUBLIC_PARA_API_KEY=
 NEXT_PUBLIC_SBC_CHAIN=radiusTestnet
 ```
 
-Use `VITE_` prefix for Vite apps. Add `.env.local` to `.gitignore` if missing.
+Vite: `VITE_SBC_API_KEY`, `VITE_PARA_API_KEY`, `VITE_SBC_CHAIN`.
 
-### A6. Optional UX (recommended)
+Create `.env.local` placeholders if missing; never commit real keys.
 
-- Copy [templates/RadiusWalletConnect.tsx](templates/RadiusWalletConnect.tsx) → expose on a dev/settings page or header.
-- Copy [templates/add-radius-to-wallet.ts](templates/add-radius-to-wallet.ts) if users report "wrong network" — call before connect.
+### A9. Migrate off Base (if needed)
 
-### A7. Replace Base references (if migrating)
+Replace `base` / `baseSepolia` with `getRadiusChain()`.  
+AA URL slug: `radiusTestnet` or `radius`.  
+EntryPoint on Radius: `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F` (AppKit handles when using `useSbcPara`).
 
-Search repo for: `baseSepolia`, `base`, `0x0000000071727De22E5E9d8BAf0edAc6f37da032`, `Kernel`, `api.aa.stablecoin.xyz/rpc/v1/base`.
-
-| Replace | With |
-|---------|------|
-| `baseSepolia` / `base` chain | `getRadiusChain()` / `radiusTestnet` |
-| Canonical EntryPoint | `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F` |
-| AA URL `.../baseSepolia/...` | `.../radiusTestnet/...` or `.../radius/...` |
-| Kernel account factory defaults | SimpleAccount (AppKit handles) |
-
-### A8. Send transactions
-
-Use hooks everywhere possible:
-
-```typescript
-import { useUserOperation } from "@stablecoin.xyz/react";
-
-const { sendUserOperation } = useUserOperation();
-await sendUserOperation({
-  to: "0x…",
-  value: "1000000000000000000", // 1 RUSD, 18 decimals
-  data: "0x",
-});
-```
-
-Batch: `sendUserOperation({ calls: [...] })`.
-
-### A9. Build verification
+### A10. Verify
 
 ```bash
-npm run build   # or pnpm / yarn equivalent
+npm run build   # or pnpm build / npx tsc --noEmit
 ```
 
-Fix: missing `"use client"`, wrong env prefix, server component importing hooks.
+## Path B — already on Para + SBC
 
-## Path B — already on SBC AppKit
+1. Add/update `radius.ts` and point `chain` + `rpcUrl` to Radius.
+2. Keep existing `ParaProvider` and `useSbcPara` wiring.
+3. Remove Base-only chain imports.
 
-1. Ensure templates/radius-chain + config exist (A2–A3).
-2. Change `chain:` in existing `SbcProvider` config to `getRadiusChain()`.
-3. Remove manual Kernel/EntryPoint overrides unless required.
-4. Run A8–A9.
+## Path C — no Para (advanced)
 
-## Path C — Privy / permissionless / wagmi only
-
-1. Set bundler **and** paymaster to the same URL ([templates/direct-aa-url.ts](templates/direct-aa-url.ts)).
-2. EntryPoint: `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`.
-3. Smart account: **SimpleAccount**, not Kernel.
-4. UserOp gas: `maxPriorityFeePerGas === maxFeePerGas`.
-5. Receipts: `pimlico_getUserOperationStatus`, not unbounded `eth_getLogs`.
-
-If migration cost is high, document C in PR; still add `src/config/radius.ts` and AA URL helper.
+Use [templates/direct-aa-url.ts](templates/direct-aa-url.ts). SimpleAccount + same EntryPoint. Only if user refuses Para or has locked-in Kernel stack.
 
 ## Path Scaffold — greenfield
 
 ```bash
-npx create-sbc-app <app-name> --chain radiusTestnet
-cd <app-name> && pnpm install && pnpm dev
+npx create-sbc-app my-app --template react-para --chain radiusTestnet
+cd my-app && pnpm install && pnpm dev
 ```
 
-For mainnet: `--chain radius`. Tell user to set API key in generated `.env`.
+User sets SBC + Para keys in generated `.env`.
 
-## Human-only steps (after you finish)
+## What the user must NOT do
 
-Tell the user exactly this:
+- Run `npm install` (you do it)
+- Run `cp env.example .env.local` (you do it)
+- Create `src/config/radius.ts` etc. (you do it)
+- Send wallet address in chat
 
-1. Get API key: https://dashboard.stablecoin.xyz/ → set `NEXT_PUBLIC_SBC_API_KEY` (or `VITE_SBC_API_KEY`).
-2. **Testnet:** fund wallet at https://testnet.radiustech.xyz/wallet
-3. **Mainnet:** set `NEXT_PUBLIC_SBC_CHAIN=radius` and use production keys.
+## What the user MAY do (optional, after you say done)
 
-Do not ask them to create files you can create.
+- Click **Connect with Para** in the browser
+- Use testnet faucet if testing a send
 
-## Integration checklist (agent self-check)
-
-Copy and mark before saying "done":
+## Integration checklist
 
 ```
-- [ ] @stablecoin.xyz/react + core + viem installed
-- [ ] src/config/radius.ts (mainnet + testnet + getRadiusChain)
-- [ ] src/lib/sbc/config.ts with EntryPoint override
-- [ ] SbcProvider wraps app root (client boundary correct)
-- [ ] .env.example updated; .env.local template or placeholder
-- [ ] No canonical Base EntryPoint left on Radius code paths
-- [ ] AA URL uses radiusTestnet or radius slug if direct integration
-- [ ] build/typecheck passes (or documented blocker)
-- [ ] User told: API key + faucet only
+- [ ] @stablecoin.xyz/react + core + viem + @getpara/* + @tanstack/react-query + turnkey peers
+- [ ] src/config/radius.ts
+- [ ] ParaProviders (client) + @getpara/react-sdk/styles.css
+- [ ] use-para-viem-radius + use-sbc-radius-para
+- [ ] Connect UI (useModal + smart account display)
+- [ ] .env.example with SBC + Para keys
+- [ ] No canonical Base EntryPoint on Radius paths
+- [ ] build/tsc passes
+- [ ] User told: two API keys + Para connect + faucet
 ```
 
-## Radius rules (do not violate)
+## Radius rules
 
-- EntryPoint: `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F` only on Radius.
-- No EIP-1559 mismatch on UserOps (AppKit ≥1.6.1 handles).
-- Balance display: prefer `rad_getBalanceRaw` for spendable RUSD ([reference.md](reference.md)).
-- No CREATE2 deployer for large contracts on Radius.
-- Docs: https://docs.stablecoin.xyz/radius/overview — not `erc4337/overview` (404).
+See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalanceRaw`, no unbounded `getLogs`.
 
-## Troubleshooting (agent fixes)
-
-| Error | Fix |
-|-------|-----|
-| Invalid EntryPoint | Radius address in config + AppKit version |
-| maxPriorityFeePerGas | Upgrade core; set both fees equal in manual UserOps |
-| Chain not configured | `wallet_addEthereumChain` helper or switchChain 72344 |
-| getLogs range | Use AppKit or bundler status polling |
-| Module not found `@/` | Align tsconfig paths or use relative imports |
-
-## Templates index
+## Templates
 
 | File | Purpose |
-|------|---------|
-| [templates/radius-chain.ts](templates/radius-chain.ts) | viem chains + env selector |
-| [templates/sbc-radius-config.ts](templates/sbc-radius-config.ts) | AppKit config factory |
-| [templates/SbcProviders-next.tsx](templates/SbcProviders-next.tsx) | Next App Router provider |
-| [templates/RadiusWalletConnect.tsx](templates/RadiusWalletConnect.tsx) | Connect + test send UI |
-| [templates/add-radius-to-wallet.ts](templates/add-radius-to-wallet.ts) | MetaMask add chain |
-| [templates/env.example.snippet](templates/env.example.snippet) | Env vars |
-| [templates/vite-main.tsx.snippet](templates/vite-main.tsx.snippet) | Vite entry wrap |
-| [templates/direct-aa-url.ts](templates/direct-aa-url.ts) | Non-AppKit AA URL |
-
-Contracts, RPCs, paymaster addresses: [reference.md](reference.md)
+| ---- | ------- |
+| [radius-chain.ts](templates/radius-chain.ts) | viem Radius chains |
+| [para-config.ts](templates/para-config.ts) | Para SDK config |
+| [use-para-viem-radius.ts](templates/use-para-viem-radius.ts) | Para → viem clients on Radius |
+| [use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) | `useSbcPara` wrapper |
+| [ParaProviders-next.tsx](templates/ParaProviders-next.tsx) | QueryClient + ParaProvider |
+| [RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) | Connect + test send |
+| [RadiusParaConnectLoader.tsx](templates/RadiusParaConnectLoader.tsx) | Next.js dynamic loader |
+| [env.example.snippet](templates/env.example.snippet) | Env vars |
+| [direct-aa-url.ts](templates/direct-aa-url.ts) | Non-Para AA URL |
 
 ## Docs
 
 - https://docs.stablecoin.xyz/radius/getting-started
 - https://docs.stablecoin.xyz/radius/configuration
 - https://docs.stablecoin.xyz/account-abstraction/getting-started
+- Blog: `create-sbc-app --template react-para`

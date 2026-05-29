@@ -4,6 +4,21 @@ Agent: use with [SKILL.md](SKILL.md) for workflow; this file is constants and ca
 
 Source: [Radius overview](https://docs.stablecoin.xyz/radius/overview), [configuration](https://docs.stablecoin.xyz/radius/configuration).
 
+## Para wallet (default)
+
+| Key | Env var | Where |
+| --- | ------- | ----- |
+| SBC paymaster | `NEXT_PUBLIC_SBC_API_KEY` | https://dashboard.stablecoin.xyz/ |
+| Para | `NEXT_PUBLIC_PARA_API_KEY` | https://developer.getpara.com/ |
+
+**Stack:** `ParaProvider` → `useParaViemRadius` → `useSbcPara` → `sbcAppKit.sendUserOperation`.
+
+**Reference repos:** `dollar-wallet-web` (AppKit + Para), `agent-payments` (`@getpara/react-sdk@2.27.0`).
+
+**Greenfield:** `npx create-sbc-app <name> --template react-para --chain radiusTestnet`
+
+Do not ask the user for a wallet address — they connect via Para modal in the browser.
+
 ## Viem chain slugs (AA API)
 
 | Network | `api.aa.stablecoin.xyz` slug | Chain ID |

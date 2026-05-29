@@ -1,13 +1,34 @@
 # SBC Skills Plugin
 
-Skills for building SBC stablecoin applications with Radius Network integration, account abstraction, and gasless transactions.
+Agent skills for building on **SBC** and **Radius Network** — gasless transactions via AppKit and **Para** wallet connection.
 
-## Included
+Install: add this repo’s plugin to Cursor / Claude Code per your marketplace setup, or copy skills from `plugins/sbc/skills/`.
 
-- `skills/`: SBC onchain development skills (see below)
+There is **no** `npm install` at the monorepo/plugin root. To try the skill on a sample app, use the example in the parent repo: `examples/radius-test-app` (see root [README.md](../../README.md#test-the-radius-skill-locally)).
 
 ## Skills
 
-### sbc-radius-integration
+### `sbc-radius-integration`
 
-Fully integrates Radius Network into a user's app using SBC AppKit. Handles install, config, providers, environment variables, wallet chain setup, and gasless transactions. Supports Next.js, Vite, and existing AA stacks (Privy/permissionless/wagmi). Executes autonomously — writes code and runs installs; only stops for a missing API key or ambiguous mainnet vs testnet in production.
+**Path:** `plugins/sbc/skills/sbc-radius-integration/`
+
+Integrates **Radius testnet/mainnet** with:
+
+- SBC AppKit (`useSbcPara`)
+- **Para** connect (`@getpara/react-sdk` + `useModal`)
+- Gasless user operations on RUSD
+
+**User provides (after agent implements):**
+
+1. `NEXT_PUBLIC_SBC_API_KEY` — [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz/)
+2. `NEXT_PUBLIC_PARA_API_KEY` — [developer.getpara.com](https://developer.getpara.com/)
+
+**Example prompt:**
+
+```text
+@sbc-radius-integration
+
+Integrate Radius testnet for me
+```
+
+**Docs:** https://docs.stablecoin.xyz/radius/overview
