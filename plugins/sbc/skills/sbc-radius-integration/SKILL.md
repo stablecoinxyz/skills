@@ -23,8 +23,6 @@ Do **not** reply with a tutorial. Do **not** tell the user to run `npm install`,
 
 **Never ask the user for:** wallet address, private key, seed, or to run shell commands.
 
-**Test harness in this repo:** if workspace is `skills` root, `cd examples/radius-test-app` first. Integrate on `src/app/page.tsx`.
-
 **Default wallet:** **Para** via `@getpara/react-sdk` + `useSbcPara` from `@stablecoin.xyz/react` (same pattern as `dollar-wallet-web`, Para versions aligned with `agent-payments`).
 
 **Canonical references (read if unsure):**
@@ -39,7 +37,7 @@ Do **not** reply with a tutorial. Do **not** tell the user to run `npm install`,
 
 ### Step 0 — Bootstrap (you run these, not the user)
 
-Detect app root (current dir or `examples/radius-test-app` in skills repo).
+Detect app root (the Next.js or Vite project workspace the user opened).
 
 ```bash
 # If .env.local missing, create from example (env.example or env.radius.example)
@@ -74,7 +72,7 @@ Do **not** ask the user to copy files or run `npm install` themselves.
 
 1. **Recon** — `package.json`, app entry, existing Para/SBC setup.
 2. **Default path** — Para + `useSbcPara` + **radiusTestnet** (see [reference.md](reference.md)).
-3. **Execute** — copy/adapt [templates/](templates/), wire providers, connect UI on main page.
+3. **Execute** — copy/adapt [templates/](templates/), wire providers and connect UI following the app’s existing layout and routing (do not assume a particular route or repo name).
 4. **Verify** — `npx tsc --noEmit` or `npm run build`; fix `"use client"` / `dynamic` issues.
 
 ### Step 5 — Done message (user does not run terminal)
@@ -153,7 +151,7 @@ Copy [templates/use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) → `s
 
 Copy [templates/ParaProviders-next.tsx](templates/ParaProviders-next.tsx) → `src/components/providers/ParaProviders.tsx`.
 
-- Wrap app in `app/layout.tsx` **or** only the route that needs wallet (e.g. `/demo/radius`).
+- Wrap the whole app in `app/layout.tsx` **or** only the route segment(s) that need wallet (route-level `layout.tsx`).
 - Entire file must be `"use client"`.
 
 **Next.js wallet route:** use a **client** loader with `next/dynamic` + `ssr: false` for the connect panel — never `dynamic(..., { ssr: false })` inside a Server Component page. See [templates/RadiusParaConnectLoader.tsx](templates/RadiusParaConnectLoader.tsx).

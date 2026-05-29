@@ -208,4 +208,4 @@ await sendUserOperation({
 - Radius docs: https://docs.radiustech.xyz
 - Mainnet explorer: https://network.radiustech.xyz
 - Testnet explorer: https://testnet.radiustech.xyz
-- SBC blog (launch): `/blog/sbc-launches-on-the-radius-network` on this site
+- SBC blog (launch): https://stablecoin.xyz/blog/sbc-launches-on-the-radius-network
