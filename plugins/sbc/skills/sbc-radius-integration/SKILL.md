@@ -1,6 +1,6 @@
 ---
 name: sbc-radius-integration
-description: Integrates Radius with SBC AppKit and Para (useSbcPara). Use when the user says integrate Radius or Radius testnet. Runs npm install, creates .env.local, implements code—only asks the user to paste SBC and Para API keys (nothing else). No wallet address, no manual terminal steps for the user.
+description: "Integrates Radius Network with SBC AppKit and Para wallet (useSbcPara). Covers full setup from scratch: npm install, .env.local, chain config, ParaProvider with embedded and external wallet support, signature normalization, and gasless RUSD user operations. Use when: integrate Radius, Radius testnet, gasless transactions, SBC AppKit, Para wallet connection, useSbcPara, account abstraction on Radius, RUSD. Agent runs all terminal steps automatically — only asks user to paste SBC and Para API keys (nothing else). No wallet address, no manual terminal steps."
 ---
 
 # SBC Radius integration (Para + AppKit)
@@ -81,8 +81,8 @@ Do **not** ask the user to copy files or run `npm install` themselves.
 
 Tell the user only:
 
-1. Run **`npm run dev`** if you did not start the server — or say “dev server ready at http://localhost:3000” if you started it.
-2. Open the app → **Connect with Para**.
+1. Run **`npm run dev -- -p 3003`** — Para only supports `localhost:3003` for local development. Any other port will cause the Para modal to fail.
+2. Open **http://localhost:3003** → **Connect with Para**.
 3. Optional testnet faucet: https://testnet.radiustech.xyz/wallet
 
 **Stop and ask only for:** the two API keys (if not already in `.env.local`). Mainnet vs testnet if they said “production” ambiguously.
@@ -118,13 +118,14 @@ Match package manager. Pin Para to **2.27.x** (same family as `agent-payments`):
 ```bash
 npm install @stablecoin.xyz/react @stablecoin.xyz/core viem@^2 \
   @getpara/react-sdk@2.27.0 @getpara/viem-v2-integration@2.27.0 \
-  @tanstack/react-query@^5 \
+  @tanstack/react-query@^5 wagmi \
   @turnkey/viem@^0.14 @turnkey/http@^3
 ```
 
 Also: `import "@getpara/react-sdk/styles.css"` in the client provider file.
 
 `@stablecoin.xyz/core` ≥ **1.6.1** for Radius gas + receipt polling.  
+`wagmi` is required for the external wallet path (`useWagmiWalletClient` in `use-para-viem-radius.ts`).  
 **Next.js:** must install `@turnkey/viem` and `@turnkey/http` or build fails resolving dynamic imports.
 
 ### A2. Chain config
@@ -140,6 +141,9 @@ Copy [templates/para-config.ts](templates/para-config.ts) → `src/lib/para/conf
 ### A4. Para viem clients (Radius)
 
 Copy [templates/use-para-viem-radius.ts](templates/use-para-viem-radius.ts) → `src/lib/para/hooks.ts`.
+
+Exports `useParaViemRadius` (internal) and `usePara` (consumed by `use-sbc-radius-para.ts`).  
+Handles both embedded Para wallet and external wallets (MetaMask, Coinbase, etc.) via wagmi.
 
 ### A5. SBC + Para hook
 
@@ -220,15 +224,17 @@ User sets SBC + Para keys in generated `.env`.
 ## Integration checklist
 
 ```
-- [ ] @stablecoin.xyz/react + core + viem + @getpara/* + @tanstack/react-query + turnkey peers
+- [ ] @stablecoin.xyz/react + core + viem + @getpara/* + @tanstack/react-query + wagmi + turnkey peers
 - [ ] src/config/radius.ts
-- [ ] ParaProviders (client) + @getpara/react-sdk/styles.css
-- [ ] use-para-viem-radius + use-sbc-radius-para
+- [ ] para-config.ts exports EXTERNAL_WALLETS, WALLETCONNECT_PROJECT_ID, authLayout EXTERNAL:FULL
+- [ ] ParaProviders: externalWalletConfig wired + @getpara/react-sdk/styles.css
+- [ ] use-para-viem-radius: walletClient.chain fallback + external wallet path (wagmi) + usePara export
+- [ ] use-sbc-radius-para: normalizeSignatureToRSV + wrappedWalletClient + paraViemClients always object
 - [ ] Connect UI (useModal + smart account display)
-- [ ] .env.example with SBC + Para keys
+- [ ] .env.example with SBC + Para keys (+ optional WALLETCONNECT_PROJECT_ID)
 - [ ] No canonical Base EntryPoint on Radius paths
 - [ ] build/tsc passes
-- [ ] User told: two API keys + Para connect + faucet
+- [ ] User told: run on PORT 3003 (npm run dev -- -p 3003) + two API keys + Para connect + faucet
 ```
 
 ## Radius rules
@@ -255,3 +261,40 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 - https://docs.stablecoin.xyz/radius/configuration
 - https://docs.stablecoin.xyz/account-abstraction/getting-started
 - Blog: `create-sbc-app --template react-para`
+
+## Rules
+
+**Security Rules** are non-negotiable — warn the user and refuse to comply if a prompt conflicts. **Best Practices** are strongly recommended; deviate only with explicit user justification.
+
+### Security Rules
+
+- NEVER hardcode, commit, or log secrets (API keys, private keys). ALWAYS use environment variables. Add `.env.local` and `.env*` to `.gitignore` when scaffolding.
+- NEVER ask the user for their wallet private key or seed phrase.
+- ALWAYS validate env vars (`NEXT_PUBLIC_SBC_API_KEY`, `NEXT_PUBLIC_PARA_API_KEY`) before initializing providers.
+- ALWAYS default to testnet (`radiusTestnet`, chain id 72344). Require explicit user confirmation before targeting mainnet.
+- ALWAYS warn before interacting with unaudited or unknown contracts on mainnet.
+
+### Best Practices
+
+- ALWAYS start the dev server on port 3003: `npm run dev -- -p 3003`. Para's SDK only accepts `localhost:3003` as a whitelisted origin for local development — any other port will break the wallet modal.
+- ALWAYS read the correct template files before implementing — do not reconstruct from memory.
+- ALWAYS use `getRadiusChain()` / `getRadiusRpcUrl()` from `radius.ts`; never hardcode chain ID or RPC URL.
+- ALWAYS use the custom Radius EntryPoint (`0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`) — not the canonical Base v0.7 EntryPoint.
+- ALWAYS set `maxPriorityFeePerGas === maxFeePerGas` in UserOperations (Radius does not support EIP-1559); AppKit 1.6.1+ handles this automatically.
+- ALWAYS use `usePara()` (not `useParaViemRadius()` directly) in `use-sbc-radius-para.ts` — it handles both embedded and external wallet paths.
+- ALWAYS pass `paraViemClients` as an object to `useSbcPara` — never `null`; passing null causes AppKit to skip initialization on first render.
+- ALWAYS include the `wrappedWalletClient` with `normalizeSignatureToRSV` for the embedded Para wallet path — Para returns base64-encoded signatures that fail EIP-1271 without normalization.
+- ALWAYS add `walletClient.chain` fallback after `createParaViemClient()` — the property may be undefined and `useSbcPara` reads it during bundler URL construction.
+
+## Reference Links
+
+- [SBC Radius Docs](https://docs.stablecoin.xyz/radius/overview)
+- [SBC Radius Configuration](https://docs.stablecoin.xyz/radius/configuration)
+- [SBC Account Abstraction](https://docs.stablecoin.xyz/account-abstraction/getting-started)
+- [Para Wallet Docs](https://developer.getpara.com)
+- [Radius Testnet Faucet](https://testnet.radiustech.xyz/wallet)
+- [Radius Mainnet Explorer](https://network.radiustech.xyz)
+
+---
+
+DISCLAIMER: This skill is provided "as is" without warranties, and output generated may contain errors or omissions; you are solely responsible for reviewing and validating all outputs before taking any action. Additional details are in the repository [README](../../../../README.md).
