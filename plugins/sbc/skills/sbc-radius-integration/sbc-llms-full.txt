@@ -1,0 +1,4243 @@
+# SBC Documentation
+
+> Complete documentation for SBC (Stable Coin) integration, account abstraction, and developer tools
+
+## What SBC Offers
+
+SBC (Stable Coin Inc) provides a complete account abstraction platform for building gasless blockchain applications. Our managed infrastructure handles the complexity of ERC-4337, so you can focus on building great user experiences.
+
+### Platform Overview
+
+**Your Application** → **SBC SDKs** (AppKit, Core, CLI) → **Gas Sponsorship** → **Blockchain Networks** (Radius, Base)
+
+### Developer SDKs
+
+#### SBC AppKit
+
+The easiest way to integrate account abstraction into your application.
+
+* **@stablecoin.xyz/react** - React components and hooks for frontend apps
+* **@stablecoin.xyz/core** - Framework-agnostic TypeScript SDK
+* **Features**: Smart account management, gasless transactions, batch operations, real-time balance tracking
+* **Installation**: `npm install @stablecoin.xyz/react @stablecoin.xyz/core viem`
+
+#### create-sbc-app CLI
+
+Scaffold an account-abstraction ready SBC application in seconds.
+
+```bash
+npx create-sbc-app my-app --chain radiusTestnet
+```
+
+**Templates available:**
+
+* `react` - Standard React template with wallet integration
+* `react-dynamic` - React + Dynamic SDK (embedded wallets)
+* `react-para` - React + Para wallet (EIP-2612 permits)
+* `react-turnkey` - React + Turnkey (passkey authentication)
+
+### Gas Sponsorship
+
+SBC provides managed gas sponsorship through our AppKit SDK, enabling truly gasless transactions for your users.
+
+| Feature         | Description                                                            |
+| --------------- | ---------------------------------------------------------------------- |
+| Gas Sponsorship | Covers all gas costs for UserOperations                                |
+| ERC-4337 v0.7   | Compatible with latest AA standard                                     |
+| EIP-712 Signing | Secure signature verification with expiration                          |
+| Multi-Chain     | Deployed on Radius Mainnet, Radius Testnet, Base Mainnet, Base Sepolia |
+
+### Supported Networks
+
+| Network            | Chain ID | Status | EntryPoint     | Gas        |
+| ------------------ | -------- | ------ | -------------- | ---------- |
+| **Radius Mainnet** | 723487   | Live   | Custom         | Low, fixed |
+| **Radius Testnet** | 72344    | Live   | Custom         | Low, fixed |
+| **Base Mainnet**   | 8453     | Live   | Canonical v0.7 | Standard   |
+| **Base Sepolia**   | 84532    | Live   | Canonical v0.7 | Standard   |
+
+#### Radius Features
+
+* **Low fees**: Predictable gas costs (\~$0.000093 per transfer)
+* **Custom EntryPoint**: `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`
+* **SimpleAccount**: Uses simpler smart account implementation from [eth-infinitism](https://github.com/eth-infinitism/account-abstraction/blob/releases/v0.7/contracts/samples/SimpleAccount.sol)
+* **RUSD Native**: Native currency is RUSD (18 decimals)
+
+### Quick Comparison
+
+| Feature                | SBC AppKit   | Custom Paymaster | Coinbase AA              |
+| ---------------------- | ------------ | ---------------- | ------------------------ |
+| **Setup Time**         | \< 5 minutes | Days             | N/A (Coinbase ecosystem) |
+| **Gas Sponsorship**    | Included     | Manual           | Included                 |
+| **Multi-Chain**        | 4+ networks  | 1 network        | Base only                |
+| **Batch Transactions** | Yes          | Yes              | Yes                      |
+| **Framework Agnostic** | Yes          | Yes              | No (Coinbase SDK)        |
+
+### Token Information
+
+SBC is a multi-chain stablecoin. The official token list is available [here](https://github.com/stablecoinxyz/SBC-token-list/blob/main/sbc-token-list.json).
+
+### What Can You Build?
+
+With SBC's gasless infrastructure, you can build applications that:
+
+* **Execute gasless transactions** - Users interact without native tokens
+* **Batch multiple operations** - Combine actions into single transactions
+* **Use smart contract wallets** - Social recovery, spending limits, multi-sig
+
+For implementation examples, see the [Use Cases](/use-cases/mass-payment) section.
+
+### Next Steps
+
+1. **New to SBC?** Start with [Getting Started](/)
+2. **Building on Radius?** See [Radius Network](/radius/overview)
+3. **Ready to code?** Jump to [SBC AppKit](/account-abstraction/app-kit)
+4. **Want CLI?** Use [create-sbc-app](/account-abstraction/create-sbc-app)
+5. **See examples?** Check out [Use Cases](/use-cases/mass-payment)
+
+### Support
+
+* **Telegram**: [https://t.me/stablecoin\_xyz](https://t.me/stablecoin_xyz)
+* **GitHub**: [https://github.com/stablecoinxyz](https://github.com/stablecoinxyz)
+* **Dashboard**: [https://dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz)
+
+
+## SBC AppKit
+
+### Overview
+
+The SBC AppKit is a comprehensive SDK designed to simplify the integration of account abstraction features into your applications. It provides both a core TypeScript SDK and React components for seamless integration.
+
+With the AppKit, developers can easily enable gasless user operations, leveraging SBC's gas sponsorship without needing to manage the underlying complexities of ERC-4337 standards.
+
+### Key Features
+
+* **Gasless Transactions**: Allow users to interact with your application without needing native tokens for gas fees, as SBC's paymaster sponsors transactions.
+* **Simplified API**: Use a straightforward API key to connect to SBC's bundler and paymaster services, abstracting the intricate details of UserOperation handling.
+* **Smart Account Integration**: Uses Kernel Smart Account from ZeroDev by default (SimpleAccount on Radius), enabling advanced wallet functionalities.
+* **React Integration**: Complete React hooks and components for seamless frontend integration.
+* **Wallet Management**: Automatic wallet detection and connection for MetaMask, Coinbase Wallet, WalletConnect, and more.
+* **Multi-Chain Support**: Works seamlessly on Radius Mainnet, Radius Testnet, Base Mainnet, and Base Sepolia.
+* **Production Logging**: Structured logging system for production environments.
+* **Developer-Friendly**: Comprehensive guides and examples to get started quickly.
+
+#### Network Support
+
+| Network        | EntryPoint     | Smart Account | Gas        |
+| -------------- | -------------- | ------------- | ---------- |
+| Radius Mainnet | Custom         | SimpleAccount | Low, fixed |
+| Radius Testnet | Custom         | SimpleAccount | Low, fixed |
+| Base Mainnet   | Canonical v0.7 | Kernel        | Standard   |
+| Base Sepolia   | Canonical v0.7 | Kernel        | Standard   |
+
+### Getting Started
+
+To integrate the SBC AppKit into your project, follow these steps:
+
+#### 1. Obtain an API Key
+
+Visit the [SBC Dashboard](https://dashboard.stablecoin.xyz). Sign in with your wallet and click on `Create Key`. If you need any assistance, reach out to us on [Telegram](https://t.me/stablecoin_xyz).
+
+#### 2. Install the SDK
+
+The AppKit is available on npm with separate packages for core functionality and React integration:
+
+```bash
+# For React applications (recommended)
+npm install @stablecoin.xyz/react @stablecoin.xyz/core viem
+
+# For backend/Node.js applications (core only)
+npm install @stablecoin.xyz/core viem
+```
+
+#### 3. Choose Your Integration Approach
+
+SBC AppKit supports multiple approaches for wallet management:
+
+##### A. React x Wallet Integration (Recommended for Frontend)
+
+Perfect for React applications with automatic wallet detection and connection.
+
+```typescript
+import { SbcProvider, useSbcApp, WalletButton } from '@stablecoin.xyz/react';
+import { radiusTestnet } from './config/radius'; // see /radius/configuration
+
+// 1. Configure the provider
+const config = {
+  apiKey: process.env.REACT_APP_SBC_API_KEY!,
+  chain: radiusTestnet,
+  wallet: 'auto', // Automatically detect available wallets
+  debug: true
+};
+
+// 2. Wrap your app
+function App() {
+  return (
+    <SbcProvider config={config}>
+      <YourApp />
+    </SbcProvider>
+  );
+}
+
+// 3. Use the hooks and components in your app
+function TransactionComponent() {
+  const { account, ownerAddress, isLoadingAccount } = useSbcApp();
+
+  return (
+    <div>
+      <WalletButton>Connect Wallet</WalletButton>
+      {account && (
+        <div>
+          <h2>Smart Account: {account.address}</h2>
+          <p>Owner: {ownerAddress}</p>
+          <p>Balance: {account.balance} wei</p>
+          <p>Deployed: {account.isDeployed ? 'Yes' : 'No'}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+##### B. Core SDK Integration (Backend/Advanced)
+
+For backend applications or advanced use cases with full control over wallet management.
+
+```typescript
+import { SbcAppKit } from '@stablecoin.xyz/core';
+import { radiusTestnet } from './config/radius'; // see /radius/configuration
+
+// Initialize with private key (backend)
+const appKit = new SbcAppKit({
+  apiKey: 'your-sbc-api-key',
+  chain: radiusTestnet,
+  privateKey: '0x1234567890abcdef...' // Your private key
+});
+
+// OR initialize with wallet client (frontend)
+const appKit = new SbcAppKit({
+  apiKey: 'your-sbc-api-key',
+  chain: radiusTestnet,
+  walletClient: yourWalletClient // Pre-configured wallet client
+});
+
+// Get account info
+const account = await appKit.getAccount();
+console.log('Smart Account:', account.address);
+console.log('Deployed:', account.isDeployed);
+console.log('Nonce:', account.nonce);
+console.log('Balance:', account.balance);
+```
+
+#### 4. Send Gasless Transactions
+
+When initialized, a smart account is created behind the scenes, owned by your wallet.
+
+You can send gasless transactions using the same API regardless of your chosen integration approach:
+
+```typescript
+// Single transaction example 
+const result = await appKit.sendUserOperation({
+  to: '0x742d35Cc6641C4532B4d4c7B4C0D1C3d4e5f6789',
+  data: '0x',
+  value: '1000000' // 1 SBC (6 decimals on Radius)
+});
+
+console.log('Transaction Hash:', result.transactionHash);
+
+// Batch transactions example
+const batchResult = await appKit.sendUserOperation({
+  calls: [
+    {
+      to: '0x742d35Cc6641C4532B4d4c7B4C0D1C3d4e5f6789',
+      data: '0x',
+      value: 500000n // 0.5 SBC (6 decimals on Radius)
+    },
+    {
+      to: '0x1234567890123456789012345678901234567890',
+      data: '0xa9059cbb...', // Encoded contract call
+      value: 0n
+    }
+  ]
+});
+```
+
+#### 5. React Hooks for Transaction Management
+
+For React applications, use the `useUserOperation` hook for transaction management:
+
+```typescript
+import { useUserOperation } from '@stablecoin.xyz/react';
+
+function TransactionComponent() {
+  const { sendUserOperation, isLoading, isSuccess, error } = useUserOperation({
+    onSuccess: (result) => console.log('Success:', result),
+    onError: (error) => console.error('Error:', error)
+  });
+
+  const handleSend = async () => {
+    await sendUserOperation({
+      to: '0x...',
+      data: '0x',
+      value: '1000000' // 1 SBC (6 decimals on Radius)
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={handleSend} disabled={isLoading}>
+        {isLoading ? 'Sending...' : 'Send 1 SBC'}
+      </button>
+      {isSuccess && <p>Transaction sent!</p>}
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  );
+}
+```
+
+#### 6. Optional: Production Logging
+
+For production environments, configure structured logging:
+
+```typescript
+import { SbcAppKit, createHttpLogger } from '@stablecoin.xyz/core';
+
+const appKit = new SbcAppKit({
+  apiKey: 'your-sbc-api-key',
+  chain: radiusTestnet,
+  debug: true, // Enable console logging for development
+  logging: {
+    enabled: true,
+    level: 'info',
+    logger: createHttpLogger('https://your-logging-endpoint.com/logs', {
+      'Authorization': 'Bearer your-token'
+    }),
+    context: {
+      appName: 'My dApp',
+      environment: 'production',
+      version: '1.0.0'
+    }
+  }
+});
+```
+
+### React Components
+
+#### SbcProvider
+
+The main provider component that wraps your app and provides SBC context.
+
+```tsx
+<SbcProvider config={config}>
+  {/* your app */}
+</SbcProvider>
+```
+
+#### WalletButton
+
+A button component for connecting to wallets with built-in loading and error states.
+
+```tsx
+<WalletButton 
+  walletType="auto"
+  onConnect={(result) => console.log('Connected:', result)}
+  onError={(error) => console.error('Error:', error)}
+>
+  Connect Wallet
+</WalletButton>
+```
+
+#### WalletSelector
+
+A component for displaying and selecting from available wallets.
+
+```tsx
+<WalletSelector
+  onConnect={(result) => console.log('Connected:', result)}
+  showOnlyAvailable={true}
+/>
+```
+
+### React Hooks
+
+#### useSbcApp
+
+Main hook for accessing SBC state and actions.
+
+```typescript
+const {
+  sbcAppKit,        // SBC AppKit instance
+  isInitialized,    // SDK initialized
+  error,            // Initialization error
+  account,          // Smart account info
+  isLoadingAccount, // Loading state
+  accountError,     // Error loading account
+  refreshAccount,   // Refresh account info
+  ownerAddress,     // EOA (wallet) address
+  disconnectWallet, // Disconnect wallet
+} = useSbcApp();
+```
+
+#### useUserOperation
+
+Hook for managing user operations with loading states and callbacks.
+
+```typescript
+const {
+  sendUserOperation, // Function to send operations
+  isLoading,         // Loading state
+  isSuccess,         // Success state
+  error,             // Error state
+} = useUserOperation({
+  onSuccess: (result) => console.log('Success:', result),
+  onError: (error) => console.error('Error:', error)
+});
+```
+
+### Configuration Options
+
+#### SbcProvider Config
+
+| Name            | Type          | Required | Description                                                          |
+| --------------- | ------------- | -------- | -------------------------------------------------------------------- |
+| `apiKey`        | string        | Yes      | Your SBC API key                                                     |
+| `chain`         | Chain         | Yes      | Blockchain network (e.g., `radiusTestnet`)                           |
+| `wallet`        | string        | No       | Wallet type: `'auto'`, `'metamask'`, `'coinbase'`, `'walletconnect'` |
+| `walletOptions` | WalletOptions | No       | Wallet connection preferences                                        |
+| `rpcUrl`        | string        | No       | Custom RPC URL                                                       |
+| `debug`         | boolean       | No       | Enable debug logging                                                 |
+| `logging`       | LoggingConfig | No       | Production logging configuration                                     |
+
+#### WalletOptions
+
+| Name               | Type      | Description                      |
+| ------------------ | --------- | -------------------------------- |
+| `projectId`        | string    | WalletConnect project ID         |
+| `autoConnect`      | boolean   | Automatically connect on init    |
+| `preferredWallets` | string\[] | Order of wallet preference       |
+| `customOptions`    | object    | Custom wallet connection options |
+
+### Examples
+
+The AppKit includes comprehensive examples in the `examples/` directory. Here are detailed examples for the most common use cases:
+
+#### Next.js Backend Example (Secure Production Pattern)
+
+This example shows how to use SBC AppKit in a Next.js application with server-side private key management for maximum security.
+
+> 📖 **Full Example**: [View complete source code on GitHub](https://github.com/stablecoinxyz/app-kit/tree/main/examples/nextjs-backend)
+
+##### 1. Environment Setup
+
+Create a `.env.local` file:
+
+```bash
+# .env.local
+SBC_API_KEY=your_sbc_api_key_here
+RPC_URL=your_rpc_url
+OWNER_PRIVATE_KEY=0x1234567890abcdef...  # Your private key
+
+NEXT_PUBLIC_SBC_API_KEY=your_sbc_api_key_here  # For client-side config
+NEXT_PUBLIC_CHAIN="radiusTestnet" # "radiusTestnet", "radius", "baseSepolia", or "base"
+NEXT_PUBLIC_RPC_URL=your_rpc_url
+```
+
+##### 2. Server-Side SBC Setup
+
+```typescript
+// app/lib/sbc-server.ts
+import { SbcAppKit } from '@stablecoin.xyz/core';
+import { radiusTestnet } from '@/config/radius'; // see /radius/configuration
+import { type Hex } from 'viem';
+
+const apiKey = process.env.SBC_API_KEY;
+const privateKey = process.env.OWNER_PRIVATE_KEY as Hex;
+
+const config = {
+  chain: radiusTestnet,
+  apiKey,
+  privateKey,
+  rpcUrl,
+};
+
+// Singleton instance for server-side operations
+let sbcAppKitInstance: SbcAppKit | null = null;
+
+export async function getSbcAppKit(): Promise<SbcAppKit> {
+  if (!sbcAppKitInstance) {
+    sbcAppKitInstance = new SbcAppKit(config);
+    
+    // Deploy smart account if needed
+    try {
+      const accountInfo = await sbcAppKitInstance.getAccount();
+      if (!accountInfo.isDeployed) {
+        await sbcAppKitInstance.sendUserOperation({
+          to: '0x0000000000000000000000000000000000000000',
+          data: '0x',
+          value: '0',
+        });
+      }
+    } catch (err) {
+      console.error('Failed to deploy smart account:', err);
+    }
+  }
+  return sbcAppKitInstance;
+}
+```
+
+##### 3. API Routes
+
+```typescript
+// app/api/account-info/route.ts
+import { NextResponse } from 'next/server';
+import { getSbcAppKit } from '@/app/lib/sbc-server';
+
+export async function GET() {
+  const kit = await getSbcAppKit();
+  const account = await kit.getAccount();
+  const ownerAddress = kit.getOwnerAddress();
+
+  return NextResponse.json({
+    ...account,
+    ownerAddress,
+  });
+}
+```
+
+```typescript
+// app/api/send-transaction/route.ts
+import { NextResponse } from 'next/server';
+import { getSbcAppKit } from '@/app/lib/sbc-server';
+
+export async function POST(request: Request) {
+  try {
+    const { to, value, data } = await request.json();
+    const appKit = await getSbcAppKit();
+    
+    const result = await appKit.sendUserOperation({
+      to,
+      value: value || '0',
+      data: data || '0x',
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+##### 4. Client-Side Component
+
+```typescript
+// app/page.tsx
+'use client';
+
+import { SbcProvider, useSbcApp } from '@stablecoin.xyz/react';
+import { radiusTestnet } from '@/config/radius'; // see /radius/configuration
+
+// (optional) custom RPC URL
+const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
+
+// Client-side config (no private key)
+const config = {
+  apiKey: process.env.NEXT_PUBLIC_SBC_API_KEY!,
+  chain: radiusTestnet,
+  debug: true,
+  rpcUrl,
+};
+
+function TransactionComponent() {
+  const { account, isLoadingAccount } = useSbcApp();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSendTransaction = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/send-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: '0x742d35Cc6641C4532B4d4c7B4C0D1C3d4e5f6789',
+          value: '1000000', // 1 SBC (6 decimals on Radius)
+        }),
+      });
+      
+      const result = await response.json();
+      console.log('Transaction sent:', result);
+    } catch (error) {
+      console.error('Transaction failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Smart Account: {account?.address}</h2>
+      <button onClick={handleSendTransaction} disabled={isLoading}>
+        {isLoading ? 'Sending...' : 'Send Transaction'}
+      </button>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <SbcProvider config={config}>
+      <TransactionComponent />
+    </SbcProvider>
+  );
+}
+```
+
+#### React Wallet Example (User Wallet Integration)
+
+This example shows how to integrate with user wallets (MetaMask, Coinbase Wallet, etc.) for true decentralized smart accounts.
+
+> 📖 **Full Example**: [View complete source code on GitHub](https://github.com/stablecoinxyz/app-kit/tree/main/examples/react-wallet)
+
+##### 1. Environment Setup
+
+Create a `.env` file:
+
+```bash
+# .env
+VITE_SBC_API_KEY=your_sbc_api_key_here
+VITE_CHAIN="radiusTestnet" # "radiusTestnet", "radius", "baseSepolia", or "base"
+VITE_RPC_URL=your_rpc_url
+```
+
+##### 2. Main App Component
+
+```typescript
+// src/App.tsx
+import { SbcProvider, WalletButton, useSbcApp, useUserOperation } from '@stablecoin.xyz/react';
+import { radiusTestnet } from './config/radius'; // see /radius/configuration
+
+const config = {
+  apiKey: import.meta.env.VITE_SBC_API_KEY,
+  chain: radiusTestnet,
+  rpcUrl,
+  wallet: 'auto', // Automatically detect available wallets
+  debug: true,
+  walletOptions: { autoConnect: false },
+};
+
+function WalletStatus() {
+  const { ownerAddress, disconnectWallet } = useSbcApp();
+  const [balances, setBalances] = useState({ rusd: '0', sbc: '0' });
+
+  useEffect(() => {
+    if (!ownerAddress) return;
+    
+    // Fetch wallet balances
+    const fetchBalances = async () => {
+      // Implementation to fetch RUSD and SBC balances
+    };
+    
+    fetchBalances();
+  }, [ownerAddress]);
+
+  if (!ownerAddress) return null;
+
+  return (
+    <div className="wallet-status">
+      <h3>✅ Wallet Connected</h3>
+      <p>EOA: {ownerAddress}</p>
+      <p>RUSD: {balances.rusd}</p>
+      <p>SBC: {balances.sbc}</p>
+      <button onClick={disconnectWallet}>Disconnect</button>
+    </div>
+  );
+}
+
+function SmartAccountInfo() {
+  const { account, refreshAccount } = useSbcApp();
+
+  return (
+    <div className="smart-account-info">
+      <h3>Smart Account</h3>
+      <p>Address: {account?.address}</p>
+      <p>Deployed: {account?.isDeployed ? 'Yes' : 'No'}</p>
+      <p>Balance: {account?.balance} wei</p>
+      <button onClick={refreshAccount}>Refresh</button>
+    </div>
+  );
+}
+
+function TransactionForm() {
+  const { account } = useSbcApp();
+  const [amount, setAmount] = useState('1');
+  const [recipient, setRecipient] = useState('');
+
+  const { sendUserOperation, isLoading, isSuccess, data, error } = useUserOperation({
+    onSuccess: (result) => console.log('Transaction successful:', result),
+    onError: (error) => console.error('Transaction failed:', error),
+  });
+
+  const handleSendTransaction = async () => {
+    if (!account || !recipient || !amount) return;
+
+    await sendUserOperation({
+      to: recipient,
+      data: '0x', // For SBC transfer
+      value: parseUnits(amount, 18).toString(),
+    });
+  };
+
+  return (
+    <div className="transaction-form">
+      <h3>Send Transaction</h3>
+      <input
+        type="text"
+        placeholder="Recipient Address"
+        value={recipient}
+        onChange={(e) => setRecipient(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Amount (SBC)"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+      />
+      <button 
+        onClick={handleSendTransaction} 
+        disabled={isLoading || !account}
+      >
+        {isLoading ? 'Sending...' : 'Send Transaction'}
+      </button>
+      
+      {isSuccess && (
+        <div className="success">
+          ✅ Transaction sent! Hash: {data?.transactionHash}
+        </div>
+      )}
+      
+      {error && (
+        <div className="error">
+          ❌ Error: {error.message}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WalletConnectFlow() {
+  const { ownerAddress } = useSbcApp();
+
+  if (!ownerAddress) {
+    return (
+      <div className="connect-wallet">
+        <h3>🔗 Connect Your Wallet</h3>
+        <p>Connect your wallet to create a smart account</p>
+        <WalletButton>Connect Wallet</WalletButton>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <WalletStatus />
+      <SmartAccountInfo />
+      <TransactionForm />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <SbcProvider config={config}>
+      <div className="app">
+        <h1>SBC Wallet Integration</h1>
+        <WalletConnectFlow />
+      </div>
+    </SbcProvider>
+  );
+}
+```
+
+#### Key Differences Between Examples
+
+| Aspect              | Next.js Backend                     | React Wallet               |
+| ------------------- | ----------------------------------- | -------------------------- |
+| **Security**        | Private key on server (most secure) | Private key in user wallet |
+| **User Experience** | No wallet connection needed         | User connects their wallet |
+| **Use Case**        | Backend services, bots, automation  | User-facing dApps          |
+| **Deployment**      | Smart account deployed once         | Smart account per user     |
+| **Gas Fees**        | Covered by SBC paymaster            | Covered by SBC paymaster   |
+
+Both examples demonstrate the same core functionality but with different security models suitable for different use cases.
+
+#### Additional Examples
+
+For more examples and advanced usage patterns, check out the complete [examples directory on GitHub](https://github.com/stablecoinxyz/app-kit/tree/main/examples):
+
+* **[React Basic](https://github.com/stablecoinxyz/app-kit/tree/main/examples/react-basic)** - Simple demo for learning the basics
+* **[React Radius](https://github.com/stablecoinxyz/app-kit/tree/main/examples/react-radius)** - Radius testnet with custom EntryPoint
+* **[Backend](https://github.com/stablecoinxyz/app-kit/tree/main/examples/backend)** - Node.js backend integration
+* **[Next.js Backend](https://github.com/stablecoinxyz/app-kit/tree/main/examples/nextjs-backend)** - Next.js with server-side private key management
+* **[React Wallet](https://github.com/stablecoinxyz/app-kit/tree/main/examples/react-wallet)** - User wallet integration with MetaMask
+
+### Radius
+
+Radius offers a **RUSD-native** economy with low, predictable gas fees. The AppKit automatically handles the differences:
+
+#### Radius Configuration
+
+```typescript
+import { defineChain } from 'viem'
+
+export const radiusTestnet = defineChain({
+  id: 72344,
+  name: 'Radius Testnet',
+  nativeCurrency: {
+    name: 'RUSD',
+    symbol: 'RUSD',
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.radiustech.xyz']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: 'Radius Explorer',
+      url: 'https://testnet.radiustech.xyz'
+    }
+  },
+  testnet: true
+})
+```
+
+#### Using Radius with AppKit
+
+```typescript
+import { SbcProvider } from '@stablecoin.xyz/react'
+import { radiusTestnet } from './config/radius'
+
+const config = {
+  apiKey: process.env.VITE_SBC_API_KEY,
+  chain: radiusTestnet  // Use Radius testnet
+}
+
+<SbcProvider config={config}>
+  <YourApp />
+</SbcProvider>
+```
+
+#### Radius-Specific Differences
+
+| Feature         | Base                        | Radius                            |
+| --------------- | --------------------------- | --------------------------------- |
+| EntryPoint      | Canonical `0x0000...7Da032` | Custom (per-network)              |
+| Smart Account   | Kernel                      | SimpleAccount                     |
+| Gas             | Standard (varies)           | Low, fixed (\~$0.000093/transfer) |
+| Currency Symbol | ETH                         | RUSD (18 decimals)                |
+
+> **Note**: The AppKit automatically switches between Kernel (Base) and SimpleAccount (Radius) based on the selected chain. No code changes needed.
+
+For more Radius details, see the [Radius documentation](/radius/overview).
+
+### Next Steps
+
+* Explore supported [Smart Account Implementations](/account-abstraction/smart-account-support) to understand the underlying wallet technology.
+* Understand the [Architecture](/account-abstraction/architecture) of SBC's account abstraction solutions.
+* Try [Radius](/radius/getting-started) for low-cost development.
+* Check out the [API Reference](https://github.com/stablecoinxyz/app-kit/blob/main/API_FULL.md) for detailed documentation.
+* Reach out on [Telegram](https://t.me/stablecoin_xyz) for support or to request testnet SBC tokens for development.
+
+
+## Account Abstraction Architecture
+
+This page illustrates the transaction flow for SBC's Account Abstraction implementation, covering both ERC-4337 for gasless transactions and EIP-7702 for atomic multi-step operations.
+
+### ERC-4337 Transaction Flow
+
+The following diagram illustrates how SBC's Account Abstraction implementation works using ERC-4337:
+
+![ERC-4337 Transaction Flow](https://www.mermaidchart.com/raw/6e50a91f-d7c3-46d0-adb5-2d8130a17bbc?theme=light\&version=v0.1\&format=svg)
+
+#### Flow Explanation
+
+1. **User Submission**: The user creates and signs a UserOperation, which is like a transaction but with more flexibility.
+
+2. **Bundler Processing**: SBC's bundler service:
+   * Validates the UserOperation
+   * Bundles it with other operations for efficiency
+   * Submits the bundle to the EntryPoint contract
+
+3. **Wallet Validation**: The EntryPoint contract validates:
+   * The wallet's signature
+   * The operation's validity
+   * Required permissions
+
+4. **Gas Handling**: Instead of users paying gas:
+   * The EntryPoint coordinates with the SBC Paymaster
+   * Gas costs are covered in SBC tokens
+   * Users don't need native tokens (ETH)
+
+5. **Payment Authorization**: The Paymaster:
+   * Verifies the user has sufficient SBC balance
+   * Authorizes the gas payment
+   * Manages gas sponsorship rules
+
+6. **Execution**: Finally:
+   * The EntryPoint executes the validated operation
+   * The target contract receives the call
+   * The transaction is completed without user gas fees
+
+### EIP-7702 Transaction Flow (Upcoming)
+
+EIP-7702 is a new proposal that enables EOAs (regular wallets) to temporarily execute smart contract code during a transaction without permanently converting to a smart account. The key aspects include:
+
+1. **Temporary Smart Contract Execution**: EOAs can specify a `contract_code` field in their transaction that will be executed only during that specific transaction.
+
+2. **No Permanent Changes**: Unlike other approaches, the smart contract code is automatically removed after the transaction completes, keeping the EOA's original properties.
+
+3. **Direct Integration**: No need for additional contracts or infrastructure - the EOA directly executes the smart contract code, making it simpler and more secure than alternatives like EIP-3074.
+
+4. **ERC-4337 Compatible**: The approach aligns with the broader account abstraction roadmap and works seamlessly with existing ERC-4337 infrastructure.
+
+### Integration with SBC AppKit
+
+SBC's AppKit abstracts much of this complexity, providing developers with a simple API to interact with both ERC-4337 and EIP-7702 transaction flows. By using the AppKit, developers can:
+
+* Send gasless UserOperations without managing bundler or paymaster interactions directly.
+* Prepare for atomic transaction bundles with EIP-7702 support once fully integrated.
+
+### Next Steps
+
+* Learn how to integrate using the [SBC AppKit](/account-abstraction/app-kit).
+* Explore supported [Smart Account Implementations](/account-abstraction/smart-account-support).
+
+
+## Create SBC App
+
+The fastest way to start building with SBC Account Abstraction. Instantly scaffold a feature-rich, gasless smart account app with a single command.
+
+***
+
+### 🚀 Quick Start
+
+```bash
+# Create a new SBC app
+npx create-sbc-app my-app
+
+# Or specify a template directly
+npx create-sbc-app my-app --template react
+
+cd my-app
+pnpm install   # or npm install
+pnpm dev       # or npm run dev
+```
+
+***
+
+### 🛠 CLI Usage
+
+```bash
+npx create-sbc-app [project-directory] [options]
+```
+
+**Options:**
+
+* `-t, --template <type>`: Template to use (`react`, `react-dynamic`, `react-para`, or `react-turnkey`)
+* `-c, --chain <chain>`: Chain to use (`baseSepolia`, `base`, `radiusTestnet`, or `radius`)
+* `--api-key <apiKey>`: Pre-configure your SBC API key
+* `-h, --help`: Show help
+
+**Examples:**
+
+```bash
+npx create-sbc-app my-app
+npx create-sbc-app my-app --template react --chain radius
+npx create-sbc-app my-app --template react-dynamic --chain base
+npx create-sbc-app my-app --template react-para --api-key your-key
+npx create-sbc-app my-app --template react-turnkey --chain base
+```
+
+**Available Templates:**
+
+* `react` — React + Vite with SBC integration (default)
+* `react-dynamic` — React + Vite with Dynamic wallet integration
+* `react-para` — React + Vite with Para wallet integration
+* `react-turnkey` — React + Vite + Express backend with Turnkey embedded wallets
+
+**Available Chains:**
+
+* `baseSepolia` — Base Sepolia testnet (default)
+* `base` — Base mainnet
+* `radiusTestnet` — Radius testnet (`react` and `react-para` templates)
+* `radius` — Radius mainnet (`react` and `react-para` templates)
+
+> **Note:** Radius chains are supported by the `react` and `react-para` templates. The `react-dynamic` and `react-turnkey` templates only support Base chains.
+
+***
+
+### 🎨 Features
+
+* **Wallet Connection**: MetaMask, Coinbase Wallet, WalletConnect
+* **Smart Account Management**: Automatic, gasless, and secure
+* **Gasless Transactions**: Send ETH or interact with contracts without gas
+* **Batch Transactions**: Multiple operations in one go
+* **Balance Tracking**: EOA and smart account balances
+* **Modern UI**: Responsive, accessible, and easy to customize
+* **TypeScript**: Full type safety and best practices
+
+***
+
+### 📝 Configuration
+
+#### Environment Variables
+
+After creating your app, configure your `.env` file:
+
+```env
+VITE_SBC_API_KEY=your_api_key_here
+VITE_SBC_CHAIN="baseSepolia"  # "baseSepolia" | "base" | "radiusTestnet" | "radius"
+VITE_SBC_DEBUG=true
+```
+
+> Get your API key from the [SBC Dashboard](https://dashboard.stablecoin.xyz).
+
+***
+
+### 📚 Template Structure
+
+* `src/App.tsx`: Main app logic and SBC integration
+* `src/main.tsx`: Vite entry point
+* `src/App.css`, `src/index.css`: Styles
+* `.env`: Environment variables
+
+***
+
+### 🧑‍💻 Customization
+
+* **Change API Key**: Edit `src/App.tsx` or `.env`
+* **Switch Chain**: Change `VITE_SBC_CHAIN` and update the import in `App.tsx`
+* **UI/UX**: Edit `App.tsx` and styles as needed
+* **Add Features**: Use SBC hooks and SDK to add custom logic
+
+***
+
+### 📖 Learn More
+
+* [SBC AppKit Documentation](/account-abstraction/app-kit)
+* [GitHub: SBC AppKit](https://github.com/stablecoinxyz/app-kit)
+* [create-sbc-app on npm](https://www.npmjs.com/package/create-sbc-app)
+* [@stablecoin.xyz/core on npm](https://www.npmjs.com/package/@stablecoin.xyz/core)
+* [@stablecoin.xyz/react on npm](https://www.npmjs.com/package/@stablecoin.xyz/react)
+
+
+## Direct Integration of SBC Paymaster and Bundler
+
+### Overview
+
+For developers who prefer direct integration without using the SBC AppKit, you can interact directly with our Account Abstraction API endpoints. This approach gives you complete control over UserOperation creation and submission while leveraging SBC's custom paymaster and bundler infrastructure.
+
+### Prerequisites
+
+1. **API Key**: Get your API key from the [SBC Dashboard](https://dashboard.stablecoin.xyz)
+2. **Network**: Currently supports Base and Base Sepolia testnet
+3. **Smart Account**: You'll need a smart account implementation (we recommend Kernel from ZeroDev)
+
+### Paymaster URLs
+
+Replace YOUR\_SBC\_API\_KEY with your actual API Key
+
+* **Base Sepolia** (Testnet): `https://api.aa.stablecoin.xyz/rpc/v1/baseSepolia/YOUR_SBC_API_KEY`
+* **Base** (Mainnet): `https://api.aa.stablecoin.xyz/rpc/v1/base/YOUR_SBC_API_KEY`
+
+### Basic Usage
+
+Use your chain-specific Account Abstraction (AA) URL as both your *Bundler* and *Paymaster* URL.
+
+#### Configuration
+
+Here's the basic integration using the SBC AA URL, with SimpleAccount, using [viem](https://viem.sh/) and [permissionless](https://github.com/pimlicolabs/permissionless.js):
+
+:::code-group
+```ts [index.ts]
+import { Address, Hex } from 'viem';
+import { smartAccountClient } from './client'
+
+// Example: Send a transaction
+const userOpHash = await smartAccountClient.sendUserOperation({
+  calls: [
+    {
+      to: "0x742d35Cc6641C4532B4d4c7B4C0D1C3d4e5f6789" as Address,
+      data: "0x" as Hex, // For ETH transfer
+      value: 1000000000000000000n, // 1 ETH
+    }
+  ]
+});
+
+// Wait for the transaction to be included
+const receipt = await smartAccountClient.waitForUserOperationReceipt({
+  hash: userOpHash,
+});
+
+console.log(`Transaction hash: ${receipt.receipt.transactionHash}`);
+console.log(`User operation hash: ${receipt.userOpHash}`);
+```
+
+```ts [client.ts]
+import { Address, createWalletClient, custom, http, PublicClient, Chain } from 'viem';
+import { base } from "viem/chains";
+import { createPublicClient } from "viem";
+import { entryPoint07Address } from "viem/account-abstraction";
+import { toSimpleSmartAccount } from "permissionless/accounts";
+import { createPaymasterClient } from "viem/account-abstraction";
+import { createSmartAccountClient } from "permissionless";
+
+const chain = base;
+
+// Create a client for your connected wallet
+export const owner = createWalletClient({
+  account: "0x..." as Address, // your wallet address
+  chain, 
+  transport: custom((window as any).ethereum),
+});
+
+// Create a public client for reading onchain
+export const publicClient = createPublicClient({
+  chain,
+  transport: http("https://base-rpc.publicnode.com"), // or custom rpc
+}) as PublicClient;
+
+// Create a SimpleAccount with your wallet as owner
+const simpleAccount = await toSimpleSmartAccount({
+  client: publicClient,
+  owner: owner,
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+});
+
+function getAccountAbstractionApiUrl(chain: Chain) {
+  switch (chain.id) {
+    case base.id:
+      // Replace with your SBC API Key
+      return `https://api.aa.stablecoin.xyz/rpc/v1/base/YOUR_SBC_API_KEY`;
+    default:
+      return `chain ${chain.name} not supported`;
+  }
+}
+
+// Create a Paymaster client from the SBC Paymaster
+const paymaster = createPaymasterClient({
+  transport: http(getAccountAbstractionApiUrl(chain)), 
+});
+
+// Package it into one Smart Account Client
+export const smartAccountClient = createSmartAccountClient({
+  account: simpleAccount,
+  chain,
+  bundlerTransport: http(getAccountAbstractionApiUrl(chain)),
+  paymaster,
+  userOperation: {
+    estimateFeesPerGas: async () => {
+      return {
+        maxFeePerGas: 10n,
+        maxPriorityFeePerGas: 10n,
+      };
+    },
+  },
+});
+```
+:::
+
+For more examples, see [Smart Account Implementations](/account-abstraction/smart-account-support).
+
+### Support
+
+* **Documentation**: [SBC AppKit Documentation](/account-abstraction/app-kit)
+* **Dashboard**: [SBC Dashboard](https://dashboard.stablecoin.xyz)
+* **Telegram**: [@stablecoin\_xyz](https://t.me/stablecoin_xyz)
+
+### Next Steps
+
+* Learn about the [SBC AppKit](/account-abstraction/app-kit) for easier integration
+* Explore supported [Smart Account Implementations](/account-abstraction/smart-account-support)
+* Understand the [Architecture](/account-abstraction/architecture) behind our solutions
+
+
+## ERC-4337 Integration with SBC
+
+### What is ERC-4337?
+
+[ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) is the Account Abstraction standard for Ethereum that enables smart contract wallets to function like EOAs (Externally Owned Accounts) without requiring changes to the Ethereum protocol. This standard introduces several key components:
+
+* **UserOperation**: A data structure that represents a user's intent to perform an action
+* **Bundler**: A service that bundles multiple UserOperations and submits them to the blockchain
+* **Paymaster**: A contract that can sponsor gas fees for users
+* **EntryPoint**: A singleton contract that verifies and executes UserOperations
+
+### SBC's Custom Implementation
+
+Stable Coin Inc has developed a custom bundler and paymaster implementation optimized for the Base network. Our implementation enables:
+
+1. **Gasless Transactions**: Users can perform transactions without having ETH for gas
+2. **Batch Transactions**: Multiple actions can be combined into a single transaction
+3. **Account Abstraction**: Smart contract wallets can be used as primary accounts
+
+### Architecture
+
+See [Architecture](/account-abstraction/architecture)
+
+### SBC Bundler
+
+Our custom bundler service:
+
+* Accepts UserOperations from clients
+* Validates operations according to ERC-4337 specification
+* Bundles compatible operations together
+* Submits bundles to the EntryPoint contract on-chain (v0.7)
+
+### SBC Paymaster
+
+Our custom paymaster:
+
+* Verifies that operations meet SBC's sponsorship criteria (coming soon)
+* Signs operations that qualify for gasless execution
+* Manages gas sponsorship for different use cases
+
+### Next Steps
+
+* Reach out to us on [Telegram](https://t.me/stablecoin_xyz) to get your Bundler and Paymaster URL, as well as some SBC on testnet to try our demos.
+* Try our use cases:
+  * [Mass Payment](/use-cases/mass-payment)
+  * [NFT Minting](/use-cases/nft-minting)
+
+
+## Account Abstraction Overview
+
+### Introduction to Account Abstraction
+
+Account Abstraction (ERC-4337) is a standard that allows smart contract wallets to act like regular Ethereum accounts, enabling transactions to be processed through a central EntryPoint contract rather than directly by the network.
+
+At Stable Coin Inc (SBC), we leverage account abstraction to provide gasless transactions, batch operations, and advanced wallet functionalities, making blockchain interactions seamless for developers and users alike.
+
+#### ERC-4337: The Foundation
+
+[ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) is the Ethereum standard for Account Abstraction that introduces a framework where users can interact with the blockchain through smart contract wallets without needing native tokens for gas fees. Key components include:
+
+* **UserOperation**: A data structure representing a user's intent to perform an action.
+* **Bundler**: A service that aggregates multiple UserOperations and submits them to the blockchain.
+* **Paymaster**: A contract that sponsors gas fees, enabling gasless transactions.
+* **EntryPoint**: A singleton contract that validates and executes UserOperations.
+
+SBC has developed custom bundler and paymaster services optimized for multiple networks:
+
+| Network            | EntryPoint     | Gas        | Smart Account    |
+| ------------------ | -------------- | ---------- | ---------------- |
+| **Radius Mainnet** | Custom         | Low, fixed | SimpleAccount    |
+| **Radius Testnet** | Custom         | Low, fixed | SimpleAccount    |
+| **Base Mainnet**   | Canonical v0.7 | Standard   | Kernel (ZeroDev) |
+| **Base Sepolia**   | Canonical v0.7 | Standard   | Kernel (ZeroDev) |
+
+> **NEW**: [Radius](/radius/overview) offers a RUSD-native economy with a custom EntryPoint deployment on both mainnet and testnet.
+
+#### EIP-7702: Enhancing Multi-Step Transactions
+
+[EIP-7702](https://eips.ethereum.org/EIPS/eip-7702) is a protocol-level standard that allows Externally Owned Accounts (EOAs) to temporarily execute smart contract code during a transaction by specifying a delegation designator, which points to the contract code. This enables features like:
+
+* **Atomic Multi-Step Transactions**: Execute complex operations across multiple contracts in a single, all-or-nothing transaction.
+* **Gas Savings**: Reduce overhead by batching operations.
+* **Enhanced UX**: Simplify user interactions with single-approval multi-step flows.
+* **Composable Flows**: Enable operations across protocols without centralized sequencing trust.
+
+SBC is actively developing tools to integrate EIP-7702 capabilities, further enhancing our account abstraction offerings with atomic transaction support.
+
+### SBC's Contributions to Account Abstraction
+
+SBC is developing at the forefront of account abstraction innovation with:
+
+* **Custom Infrastructure**: Our tailored paymaster and bundler services across Base and Radius networks ensure efficient and gasless transaction processing.
+* **Developer Tools**: Through `AppKit`, we provide a simple SDK that abstracts the complexity of account abstraction, making integration straightforward.
+* **Multi-Chain Support**: Support for Radius Mainnet, Radius Testnet, Base Mainnet, and Base Sepolia with network-specific optimizations.
+* **Cross-Standard Support**: Supporting both ERC-4337 for gasless operations and EIP-7702 (coming soon) for atomic transactions.
+
+### Next Steps
+
+* Learn about the [SBC AppKit](/account-abstraction/app-kit) for easy integration.
+* Explore supported [Smart Account Implementations](/account-abstraction/smart-account-support).
+* Understand the [Architecture](/account-abstraction/architecture) behind our account abstraction solutions.
+* Try [Radius](/radius/overview) for low-cost development.
+
+
+## Supported Smart Account Implementations
+
+SBC supports a variety of smart account implementations for Account Abstraction, compatible with both ERC-4337 (EntryPoint v0.7) and upcoming EIP-7702 features for atomic transactions. These implementations enable enhanced functionalities such as gasless transactions, multi-signature security, and batched operations, providing flexibility for developers building on SBC's infrastructure.
+
+* [SimpleAccount](https://github.com/eth-infinitism/account-abstraction/blob/releases/v0.7/contracts/samples/SimpleAccount.sol)
+* [Safe](https://github.com/safe-global/safe-smart-account)
+* [Kernel from ZeroDev](https://github.com/zerodevapp/kernel)
+* [Light from Alchemy](https://github.com/alchemyplatform/light-account)
+* [Thirdweb Smart Account](https://thirdweb.com/explore/smart-wallet)
+* [Nexus from Biconomy](https://github.com/bcnmy/nexus)
+
+### Sample Usage
+
+Assuming you have a viem client, owner wallet address, and an entry point address:
+
+```typescript
+import { createWalletClient, http } from "viem";
+import { base } from "viem/chains";
+
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http("https://base-rpc.publicnode.com"),
+});
+
+const owner = createWalletClient({
+  account: "0x..." as Address, // your wallet address
+  chain: base, 
+  transport: custom((window as any).ethereum),
+});
+
+const owner2 = privateKeyToAccount(
+  "0x..." as Address // your wallet private key
+);
+```
+
+Please note that each smart account implementation has its slightly different parameters.
+
+#### SimpleAccount
+
+```typescript
+import { toSimpleSmartAccount } from "permissionless/accounts";
+
+const simpleAccount = await toSimpleSmartAccount({
+  client: publicClient,
+  owner: owner,
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+});
+```
+
+#### Safe
+
+```typescript
+import { toSafeSmartAccount } from "permissionless/accounts";
+
+const safeAccount = await toSafeSmartAccount({
+  client: publicClient,
+  owners: [owner],
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+  version: "1.4.1",
+});
+```
+
+#### Thirdweb Smart Account
+
+```typescript
+import { toThirdwebSmartAccount } from "permissionless/accounts";
+
+const thirdwebAccount = await toThirdwebSmartAccount({
+  client: publicClient,
+  owner: owner,
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+});
+```
+
+#### Kernel (ZeroDev)
+
+```typescript
+import { toKernelSmartAccount } from "permissionless/accounts";
+
+const kernelAccount = await toKernelSmartAccount({
+  client: publicClient,
+  owners: [owner],
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+});
+```
+
+#### Light (Alchemy)
+
+```typescript
+import { toLightSmartAccount } from "permissionless/accounts";
+
+const lightAccount = await toLightSmartAccount({
+  client: publicClient,
+  owner: owner,
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+  version: "2.0.0",
+});
+```
+
+#### Nexus (Biconomy)
+
+```typescript
+import { toNexusSmartAccount } from "permissionless/accounts";
+
+const nexusAccount = await toNexusSmartAccount({
+  client: publicClient,
+  owners: [owner],
+  version: "1.0.0",
+});
+```
+
+
+## Reward Distribution
+
+### Overview
+
+Reward Distribution is a pivotal aspect of Stable Coin Inc's (SBC) strategy to incentivize user engagement and adoption of our stablecoin solutions. By allocating rewards based on tracked on-chain activity, SBC encourages users to interact with our ecosystem, fostering a vibrant community of developers and end-users.
+
+:::note
+This documentation is a preview of upcoming functionality. Reward distribution features will be fully documented in future updates.
+:::
+
+### Next Steps
+
+* Learn about [Activity Tracking](/activity-rewards/tracking) to understand how activities are monitored.
+* Review the [Overview](/activity-rewards/overview) for a broader perspective on Activity and Rewards.
+* Reach out on [Telegram](https://t.me/stablecoin_xyz) to discuss custom reward programs or API integration.
+
+
+## Activity and Rewards Overview
+
+### Introduction
+
+Stable Coin Inc (SBC) is committed to fostering engagement and incentivizing user activity within the blockchain ecosystem. Our Activity and Rewards initiative focuses on tracking on-chain interactions and distributing rewards to users based on their participation. This system is designed to encourage adoption of SBC tokens and enhance user interaction with our stablecoin solutions.
+
+### Key Components
+
+SBC's Activity and Rewards system comprises several key components:
+
+* **Activity Tracking**: Monitoring and recording user interactions across supported blockchains, capturing data on transactions, swaps, and other engagements with SBC tokens.
+* **On-Chain Data Reading**: Utilizing specialized tools to read and analyze blockchain data, ensuring accurate and comprehensive activity logs.
+* **Reward Distribution**: A mechanism to allocate SBC tokens or other incentives to users based on predefined criteria, promoting active participation.
+
+### Benefits for Users and Developers
+
+* **User Incentives**: Users receive rewards for engaging with SBC-powered applications, making blockchain interactions more appealing.
+* **Developer Tools**: Developers can integrate activity tracking into their dApps, leveraging SBC's APIs to monitor user engagement and distribute rewards, enhancing user retention.
+* **Ecosystem Growth**: By rewarding activity, SBC fosters a vibrant ecosystem where users and developers mutually benefit from increased adoption.
+
+### How It Works
+
+1. **Data Collection**: SBC's infrastructure collects data on user activities.
+2. **Analysis and Scoring**: Activities are analyzed and scored based on impact, frequency, or other metrics defined by SBC.
+3. **Reward Allocation (TBD)**: Based on the scoring, rewards are allocated and distributed to users, often as gasless transactions.
+
+### Next Steps
+
+* Learn about [Activity Tracking](/activity-rewards/tracking) to understand how SBC monitors on-chain interactions.
+* Explore [Reward Distribution](/activity-rewards/distribution) for details on how incentives are allocated.
+* Reach out on [Telegram](https://t.me/stablecoin_xyz) for integration support or to discuss custom reward programs.
+
+
+## Activity Tracking
+
+### Overview
+
+Activity Tracking is a core component of Stable Coin Inc's (SBC) strategy to incentivize and understand user engagement within the blockchain ecosystem. By monitoring on-chain interactions involving SBC tokens, we can gather valuable data to inform reward distribution and enhance our stablecoin solutions.
+
+:::note
+This documentation is a preview of upcoming functionality. Activity Tracking features will be fully documented in future updates. Please reach out to us on [Telegram](https://t.me/stablecoin_xyz) to join our early developer program.
+:::
+
+### How SBC Tracks Activity
+
+SBC employs sophisticated tools and APIs to track a wide range of on-chain activities across supported networks, particularly focusing on the Base network where our infrastructure is optimized. Key aspects of our tracking system include:
+
+* **Token Holding**: Calculate holding period of SBC tokens, tracking loyalty across multiple supported chains.
+* **Transaction Monitoring**: Capturing data on SBC token transfers, including mass payments and individual transactions.
+* **Swap Activity**: Recording swaps between SBC and other tokens like USDC, providing insights into liquidity and user preferences.
+
+### Technical Implementation
+
+SBC's activity tracking is powered by projects within the `activity-map` initiative, specifically:
+
+* **Activity API**: A dedicated API service (`activity-api`) that provides endpoints for real-time activity data, allowing developers to query user interactions.
+* **On-Chain Reader**: A specialized tool (`onchain-reader`) that reads and processes blockchain data, ensuring comprehensive coverage of SBC-related events.
+
+#### Integration Example
+
+Developers can integrate activity tracking into their applications using SBC's APIs. Here's a basic example of querying activity data:
+
+```typescript
+import axios from 'axios';
+
+// Replace with your SBC API key
+const API_KEY = 'YOUR_SBC_API_KEY';
+const ACTIVITY_API_URL = 'https://api.activity.stablecoin.xyz/v1/transactions';
+
+async function fetchUserActivity(userAddress) {
+  try {
+    const response = await axios.get(`${ACTIVITY_API_URL}?user=${userAddress}`, {
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+    });
+    
+    console.log('User Activity:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching activity:', error);
+    return null;
+  }
+}
+
+// Example usage
+fetchUserActivity('0x...user_address...');
+```
+
+### Privacy and Security
+
+SBC is committed to user privacy:
+
+* **Anonymized Data**: Activity data is aggregated and anonymized where possible to protect user identities.
+* **Opt-In Tracking**: Users can opt into detailed tracking for potential rewards, with clear consent mechanisms.
+* **Secure Storage**: All activity data is stored securely, adhering to best practices in data protection.
+
+### Benefits for Developers
+
+* **User Engagement Insights**: Understand how users interact with your dApp through detailed activity reports.
+* **Reward Program Integration**: Use activity data to design custom reward programs, incentivizing specific user behaviors.
+* **Enhanced Analytics**: Combine SBC's activity data with your own metrics for comprehensive analytics.
+
+### Next Steps
+
+* Explore [Reward Distribution](/activity-rewards/distribution) to learn how tracked activity translates into user incentives.
+* Review the [Overview](/activity-rewards/overview) for a broader perspective on Activity and Rewards.
+* Reach out on [Telegram](https://t.me/stablecoin_xyz) for API access or integration support.
+
+
+## EIP-7702 Tools
+
+This page provides an overview of SBC's upcoming EIP-7702 integration and tools.
+
+:::note
+This documentation is a preview of upcoming functionality. EIP-7702 features will be fully documented in future updates.
+:::
+
+### Upcoming Features
+
+Our EIP-7702 integration will include:
+
+* Access of advanced capabilities via [modular smart accounts](https://erc7579.com/modules) (e.g. Kernel from Zerodev)
+
+  * Gas optimization tools for bundled transactions
+  * Session keys for pre-approved user operations under pre-defined conditions
+  * Passkey (WebAuthn) signing
+  * ... and more
+
+### Use Cases
+
+Some of the use cases that will be enabled by our EIP-7702 tools include:
+
+* **DeFi**: Multi-step lending, borrowing, and trading operations in a single transaction
+* **NFT**: Purchase, stake, and list operations combined
+* **DAO**: Proposal creation, voting, and execution in one transaction
+* **Cross-protocol**: Operations spanning multiple protocols executed atomically
+
+### Release Timeline
+
+Our EIP-7702 tools are currently in development. Stay tuned for updates on the release timeline and early access opportunities.
+
+
+## LayerZero Integration
+
+SBC is now integrated with LayerZero's interoperability infrastructure to enable seamless transfers between blockchains. This integration lets users easily move SBC between supported blockchain networks through a native mint and burn process.
+
+### What is LayerZero?
+
+[LayerZero](https://layerzero.network/) is a leading omnichain protocol that utilizes the Omnichain Fungible Token (OFT) standard to enable native crosschain transfers. LayerZero's infrastructure facilitates the direct minting and burning of SBC on supported networks. This mint/burn process ensures that native supply is maintained in a secure and transparent manner.
+
+### Supported Chains
+
+SBC Token is deployed and interoperable through LayerZero on:
+
+* Ethereum
+* Base
+* Celo
+* Optimism
+* Polygon
+* Arbitrum
+* Avalanche
+* Solana
+
+### Transfer on Stargate
+
+With the LayerZero integration, SBC is now supported on [Stargate](https://stargate.finance/), the largest fully composable native asset bridge in DeFi. Users can transfer native SBC crosschain with:
+
+* Zero slippage
+* Instant guaranteed finality
+* Unified liquidity layer
+* Simple user experience
+
+Developers can utilize Stargate to build stablecoin flows without having users navigate multiple networks.
+
+![Stargate Bridge Interface](../stargate.png)
+
+### Benefits
+
+The LayerZero integration provides several key advantages:
+
+1. Reduces liquidity fragmentation - no need for liquidity pools to facilitate transfers
+2. Seamless crosschain transfers with just a few clicks
+3. Native token transfers across all supported networks
+4. Simplified user experience by abstracting away blockchain complexity
+
+### Developer Integration
+
+If you're interested in building with SBC and LayerZero, you can reach out to the team on [Telegram](https://t.me/stablecoin_xyz). The integration enables developers to:
+
+* Build robust crosschain systems
+* Leverage unified liquidity
+* Create seamless stablecoin payment flows
+* Implement chain abstraction for better UX
+
+
+## Canton Network
+
+Canton is a privacy-preserving interoperability protocol for financial networks. SBC stablecoin is available on Canton, built on the CIP-56 token standard.
+
+### What is Canton?
+
+Canton enables:
+
+* **Privacy-preserving transactions** through zero-knowledge proofs
+* **Interoperability** between different financial networks
+* **Atomic cross-network transactions** without centralized sequencing
+* **Regulatory compliance** through configurable privacy controls
+
+[Canton Network](https://canton.network) • [CIP-56 Token Standard](https://www.canton.network/blog/what-is-cip-56-a-guide-to-cantons-token-standard)
+
+### SBC on Canton
+
+SBC stablecoin on Canton uses the CIP-56 token standard with the following configuration:
+
+#### Token & Party Configuration
+
+| Field                                      | Value                                                                                                                                        |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SBC Token ID** (RegistrarInternalScheme) | `f29bdd7a-1469-498a-ba2a-796bf5387b31`                                                                                                       |
+| **Provider Party ID** (Token Admin)        | `party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e`                           |
+| **Registrar Party ID** (Token Admin)       | `party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e`                           |
+| **Instrument Configuration** (Contract ID) | `00e057aa8622f8b37b97dd6a3eb6d373abbd46e424b170f1c287fbf1729c879544ca101220682829447fd21219b6fe95e1c8867c1d0fc7225887e8008c1e64d3c58e75b513` |
+| **Template**                               | `TemplateUtility.Registry.V0.Configuration.Instrument:InstrumentConfigurationTemplate`                                                       |
+| **Package ID**                             | `3b25e7327b493bbe063e89d34fdacbfcc491007e5eabefea3a2919044a28f452`                                                                           |
+
+### Integration
+
+To incorporate SBC in your Canton application, use the configuration above with the CIP-56 token standard.
+
+### Key Differences from EVM Networks
+
+| Feature            | Canton                            | EVM Networks (Base, Radius) |
+| ------------------ | --------------------------------- | --------------------------- |
+| **Architecture**   | DLT with privacy-preserving pools | Traditional blockchain      |
+| **Token Standard** | CIP-56                            | ERC-20 / ERC-4337           |
+| **Identity Model** | Party IDs (DID-based)             | Ethereum addresses          |
+| **Privacy**        | Configurable per transaction      | Public by default           |
+| **Settlement**     | On-network atomic settlement      | Block-based settlement      |
+
+### Next Steps
+
+* Learn more about [CIP-56](https://www.canton.network/blog/what-is-cip-56-a-guide-to-cantons-token-standard)
+* Visit [Canton Network](https://canton.network) for full documentation
+* [What SBC Offers](/what-sbc-offers) - Platform overview
+
+### External Resources
+
+* **Canton Network**: [https://canton.network](https://canton.network)
+* **CIP-56 Guide**: [https://www.canton.network/blog/what-is-cip-56-a-guide-to-cantons-token-standard](https://www.canton.network/blog/what-is-cip-56-a-guide-to-cantons-token-standard)
+
+
+## Privy Authentication
+
+### Overview
+
+Stable Coin Inc (SBC) has developed a demo integration with [Privy](https://www.privy.io/), a leading platform for user authentication and identity management in Web3. This integration simplifies the onboarding process for users, allowing them to interact with SBC-powered applications using familiar authentication methods like email, social logins, or phone numbers, while still benefiting from blockchain security and gasless transactions.
+
+### Benefits of Privy Integration
+
+* **User-Friendly Onboarding**: Removes the barrier of managing private keys or seed phrases by offering authentication through everyday methods (email, Google, Twitter, etc.).
+* **Seamless Wallet Creation**: Automatically creates both embedded wallets and smart accounts for users upon authentication.
+* **Gasless Experience**: Combines Privy's smart wallets with SBC's paymaster for a fully gasless user experience.
+* **Enhanced Security**: Leverages Privy's secure identity management alongside smart account features.
+* **Dual Wallet Support**: Users get both an embedded wallet for regular transactions and a smart wallet for gasless transactions.
+
+### How It Works
+
+1. **Authentication**: Users log in via Privy using their preferred method (e.g., email or social account).
+2. **Wallet Provisioning**: Privy automatically creates:
+   * An embedded wallet for regular transactions
+   * A smart wallet configured with SBC's paymaster for gasless transactions
+3. **SBC Integration**: The smart wallet is automatically configured to use SBC's paymaster, enabling gasless transactions with SBC tokens.
+4. **User Interaction**: Users can now interact with SBC-powered dApps without needing to manage gas fees or complex wallet setups.
+
+### Technical Implementation
+
+SBC's Privy integration is showcased in the `privy-demo` project, which includes:
+
+* **Next.js Application**: A demo application built with Next.js, demonstrating Privy authentication flows.
+* **Smart Wallet Integration**: Integration with Privy's smart wallets using SBC's paymaster.
+* **UI Components**: User interface elements for login, balance display, and gasless transactions.
+
+> 📖 **Full Example**: [View complete source code on GitHub](https://github.com/stablecoinxyz/privy-demo)
+
+### Privy Dashboard Setup
+
+#### 1. Get your Paymaster & Bundler Configuration URLs ready
+
+Be sure to replace `YOUR_SBC_API_KEY` from an API Key from the [SBC Dashboard](https://dashboard.stablecoin.xyz)
+
+Bundler URL: `https://api.aa.stablecoin.xyz/rpc/v1/baseSepolia/YOUR_SBC_API_KEY`
+Paymaster URL: `https://api.aa.stablecoin.xyz/rpc/v1/baseSepolia/YOUR_SBC_API_KEY`
+
+#### 2. Go to your Privy Dashboard
+
+Under `Wallet Infrastructure`, click on `Smart wallets`, then `+ Add new chain`
+
+![Privy Smart Wallet Setup](../privy-smart-wallet.png)
+
+#### 3. Configure your chain
+
+Select `Base Sepolia` and input the Bundler URL and Paymaster URL from step 1. Then click `Save and close`.
+
+![Privy Paymaster Setup](../privy-setup-paymaster.png)
+
+Your Privy app is now set up to use SBC's Paymaster on Base Sepolia!
+
+#### Integration Example
+
+Here's a simplified example of setting up Privy with SBC's paymaster:
+
+```typescript
+// app/providers.tsx
+'use client';
+
+import { PrivyProvider } from '@privy-io/react-auth';
+import { SmartWalletsProvider } from '@privy-io/react-auth/smart-wallets';
+import { WagmiProvider, createConfig } from '@privy-io/wagmi';
+import { baseSepolia } from 'viem/chains';
+import { http } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <PrivyProvider
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
+      config={{
+        embeddedWallets: {
+          ethereum: {
+            createOnLogin: 'all-users',
+          },
+        },
+        defaultChain: baseSepolia,
+        supportedChains: [baseSepolia],
+      }}
+    >
+      <SmartWalletsProvider
+        config={{
+          paymasterContext: {
+            mode: 'SPONSORED',
+            calculateGasLimits: true,
+            expiryDuration: 3600,
+            sponsorshipInfo: {
+              webhookData: {},
+              smartAccountInfo: {
+                name: 'SBC Gasless',
+                version: '1.0.0',
+                description: 'SBC',
+                icon: 'https://swap.stablecoin.xyz/nav-sbc-logo.svg',
+                website: 'https://stablecoin.xyz',
+                email: 'support@stablecoin.xyz',
+                twitter: 'https://twitter.com/stablecoin_xyz',
+              }
+            }
+          }
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <WagmiProvider
+            config={createConfig({
+              chains: [baseSepolia],
+              transports: { [baseSepolia.id]: http() },
+            })}
+          >
+            {children}
+          </WagmiProvider>
+        </QueryClientProvider>
+      </SmartWalletsProvider>
+    </PrivyProvider>
+  );
+}
+```
+
+#### Utility Functions
+
+First, create the utility functions needed for the demo:
+
+```typescript
+// src/utils/erc20.ts
+export const ERC20_ABI = [
+  {
+    constant: true,
+    inputs: [{ name: 'owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: 'balance', type: 'uint256' }],
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'decimals',
+    outputs: [{ name: '', type: 'uint8' }],
+    type: 'function',
+  },
+];
+```
+
+```typescript
+// src/utils/format.ts
+import { formatUnits } from 'viem';
+import { SBC_DECIMALS } from '../constants';
+
+export function formatSbc(balance: bigint | number | string): string {
+  return Number(formatUnits(BigInt(balance), SBC_DECIMALS)).toFixed(3);
+}
+```
+
+#### Using Smart Wallets for Gasless Transactions
+
+```typescript
+// components/GaslessTransferButton.tsx
+import React, { useState } from 'react';
+import { encodeFunctionData } from 'viem';
+import { useSmartWallets } from '@privy-io/react-auth/smart-wallets';
+import { SBC_TOKEN_ADDRESS, SBC_DECIMALS, DEMO_AMOUNT } from '../constants';
+
+function isValidAddress(address: string): address is `0x${string}` {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
+export function GaslessTransferButton({
+  onTxSent,
+  setStatusMessage,
+}: {
+  onTxSent?: (txHash: string) => void;
+  setStatusMessage: (msg: string) => void;
+}) {
+  const { client: smartWalletClient } = useSmartWallets();
+  const [recipient, setRecipient] = useState<`0x${string}`|''>('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+
+  const handleTransfer = async () => {
+    setError(null);
+    if (!isValidAddress(recipient)) {
+      setError('Please enter a valid Ethereum address.');
+      return;
+    }
+    if (!smartWalletClient) {
+      setStatusMessage('Smart wallet not ready.');
+      return;
+    }
+    setIsSending(true);
+    try {
+      const data = encodeFunctionData({
+        abi: [
+          {
+            name: 'transfer',
+            type: 'function',
+            stateMutability: 'nonpayable',
+            inputs: [
+              { name: 'to', type: 'address' },
+              { name: 'amount', type: 'uint256' },
+            ],
+            outputs: [{ name: '', type: 'bool' }],
+          },
+        ],
+        functionName: 'transfer',
+        args: [recipient, BigInt(Number(DEMO_AMOUNT) * 10 ** SBC_DECIMALS)],
+      });
+      const txHash = await smartWalletClient.sendTransaction({
+        to: SBC_TOKEN_ADDRESS,
+        data,
+      });
+      setStatusMessage(`Gasless transfer successful! Tx: ${txHash}`);
+      onTxSent?.(txHash);
+      setRecipient('');
+    } catch (error) {
+      console.error(error);
+      setStatusMessage('Transfer failed. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="block mb-2 text-sm font-medium text-gray-700" htmlFor="recipient-address">
+        Recipient Address
+      </label>
+      <input
+        id="recipient-address"
+        type="text"
+        value={recipient}
+        onChange={e => setRecipient(e.target.value as `0x${string}`)}
+        placeholder="0x..."
+        className="w-full mb-2 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono text-sm bg-white text-gray-900"
+        autoComplete="off"
+        spellCheck={false}
+        maxLength={42}
+      />
+      {error && <div className="mb-2 text-red-600 text-sm">{error}</div>}
+      <button
+        onClick={handleTransfer}
+        disabled={!smartWalletClient || isSending}
+        className="w-full mt-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors cursor-pointer"
+      >
+        <div className="text-center">
+          <div>Send Gasless Transfer ({DEMO_AMOUNT} SBC)</div>
+          {recipient && isValidAddress(recipient) && (
+            <div className="font-mono text-sm mt-1">{recipient.slice(0, 8)}...{recipient.slice(-6)}</div>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+}
+```
+
+#### Main App Component
+
+```typescript
+// app/page.tsx
+'use client';
+
+import { usePrivy } from '@privy-io/react-auth';
+import { useEffect, useState } from 'react';
+import { createPublicClient, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
+import { useWallets } from '@privy-io/react-auth';
+import { GaslessTransferButton } from '../components/GaslessTransferButton';
+import { ERC20_ABI } from '../utils/erc20';
+import { formatSbc } from '../utils/format';
+import { SBC_TOKEN_ADDRESS } from '../constants';
+
+export default function Home() {
+  const { ready, login, authenticated, logout, user } = usePrivy();
+  const { wallets } = useWallets();
+  const [embeddedBalance, setEmbeddedBalance] = useState<string | null>(null);
+  const [smartWalletBalance, setSmartWalletBalance] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [txHistory, setTxHistory] = useState<string[]>([]);
+
+  // Get wallets with fallback detection
+  const embeddedWallet = wallets.find(w => w.connectorType === 'embedded');
+  const smartWalletFromWallets = wallets.find(w => w.connectorType === 'smart_wallet');
+  const smartWalletFromUser = user?.linkedAccounts?.find(account => account.type === 'smart_wallet');
+  const smartWallet = smartWalletFromWallets || smartWalletFromUser;
+
+  // Fetch token balances
+  useEffect(() => {
+    const fetchBalances = async () => {
+      if (!authenticated) return;
+
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http(),
+      });
+
+      try {
+        // Embedded wallet balance
+        if (embeddedWallet?.address) {
+          const balance = await publicClient.readContract({
+            address: SBC_TOKEN_ADDRESS,
+            abi: ERC20_ABI,
+            functionName: 'balanceOf',
+            args: [embeddedWallet.address],
+          });
+          setEmbeddedBalance(formatSbc(balance as bigint));
+        }
+
+        // Smart wallet balance
+        if (smartWallet?.address) {
+          const smartBalance = await publicClient.readContract({
+            address: SBC_TOKEN_ADDRESS,
+            abi: ERC20_ABI,
+            functionName: 'balanceOf',
+            args: [smartWallet.address],
+          });
+          setSmartWalletBalance(formatSbc(smartBalance as bigint));
+        }
+      } catch (error) {
+        console.error('Failed to fetch balances:', error);
+        setStatusMessage('Failed to fetch wallet balances');
+      }
+    };
+
+    fetchBalances();
+  }, [authenticated, embeddedWallet?.address, smartWallet?.address]);
+
+  // Clear status message after 5 seconds
+  useEffect(() => {
+    if (statusMessage) {
+      const timeout = setTimeout(() => setStatusMessage(null), 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [statusMessage]);
+
+  const addTxToHistory = (txHash: string) => {
+    setTxHistory(prev => [txHash, ...prev]);
+  };
+
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-900">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 text-gray-900">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="bg-white p-8 rounded-lg shadow">
+            <h2 className="text-xl mb-4 text-gray-900">Connect Your Wallet</h2>
+            <p className="text-gray-600 mb-6">Connect with Privy to start using gasless transactions</p>
+            <button
+              onClick={login}
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              Connect with Privy
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4 text-gray-900">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-900">Privy + SBC Paymaster Demo</h1>
+        
+        {statusMessage && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-center">
+            {statusMessage}
+          </div>
+        )}
+
+        <div className="space-y-6">
+          {/* Wallet Information */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Wallet Information</h2>
+            
+            {/* Embedded Wallet */}
+            <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-green-800">Embedded Wallet</p>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Regular Transactions</span>
+              </div>
+              {embeddedWallet?.address ? (
+                <>
+                  <p className="font-mono text-sm text-gray-800 mb-1">{embeddedWallet.address}</p>
+                  <p className="text-lg font-bold text-green-600">
+                    Balance: {embeddedBalance !== null ? `${embeddedBalance} SBC` : 'Loading...'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-gray-500 italic">Not connected</p>
+              )}
+            </div>
+
+            {/* Smart Wallet */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-blue-800">Smart Wallet</p>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Gasless Transactions</span>
+              </div>
+              {smartWallet?.address ? (
+                <>
+                  <p className="font-mono text-sm text-gray-800 mb-1">{smartWallet.address}</p>
+                  <p className="text-lg font-bold text-blue-600">
+                    Balance: {smartWalletBalance !== null ? `${smartWalletBalance} SBC` : 'Loading...'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-gray-500 italic">Creating smart wallet...</p>
+              )}
+            </div>
+          </div>
+
+          {/* Gasless Transfer */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Gasless Transfer</h2>
+            <p className="text-gray-600 mb-4">
+              Send SBC tokens without paying gas fees using SBC's paymaster.
+            </p>
+            
+            <GaslessTransferButton
+              onTxSent={addTxToHistory}
+              setStatusMessage={setStatusMessage}
+            />
+          </div>
+
+          {/* Transaction History */}
+          {txHistory.length > 0 && (
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">Transaction History</h2>
+              <div className="space-y-2">
+                {txHistory.map((tx, index) => (
+                  <div key={tx} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <a
+                      href={`https://sepolia.basescan.org/tx/${tx}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-sm text-blue-600 hover:underline truncate flex-1 mr-4 cursor-pointer"
+                    >
+                      {tx}
+                    </a>
+                    {index === 0 && (
+                      <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+                        Latest
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="text-center">
+            <button
+              onClick={logout}
+              className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Disconnect Wallet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Environment Setup
+
+Create a `.env.local` file:
+
+```bash
+# .env.local
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id_here
+```
+
+### Dependencies
+
+Make sure to install the required dependencies:
+
+```bash
+npm install @privy-io/react-auth @privy-io/react-auth/smart-wallets @privy-io/wagmi @tanstack/react-query viem wagmi
+```
+
+**Key Dependencies:**
+
+* `@privy-io/react-auth` - Core Privy authentication
+* `@privy-io/react-auth/smart-wallets` - Smart wallet functionality
+* `@privy-io/wagmi` - Wagmi integration for Privy
+* `@tanstack/react-query` - Query client for data fetching
+* `viem` - Ethereum library
+* `wagmi` - React hooks for Ethereum
+
+### Key Features Demonstrated
+
+1. **Dual Wallet System**: Users get both embedded and smart wallets
+2. **Automatic Smart Wallet Creation**: Smart wallets are created automatically on login
+3. **SBC Paymaster Integration**: Smart wallets use SBC's paymaster for gasless transactions
+4. **Balance Tracking**: Real-time balance updates for both wallet types with fallback detection
+5. **Transaction History**: Track completed gasless transactions with explorer links
+6. **Error Handling**: Comprehensive error handling, address validation, and user feedback
+7. **Smart Wallet Detection**: Robust fallback logic for detecting smart wallets from multiple sources
+8. **Status Management**: Auto-clearing status messages and loading states
+
+### Use Cases
+
+* **dApp Onboarding**: Simplify user entry into your decentralized application with familiar login methods.
+* **Enterprise Solutions**: Enable corporate users to interact with blockchain services without technical knowledge of wallets.
+* **Gaming Platforms**: Lower the entry barrier for gamers unfamiliar with crypto, allowing seamless in-game transactions.
+* **DeFi Applications**: Provide gasless trading and yield farming experiences.
+
+### Next Steps
+
+* Check out the [complete demo on GitHub](https://github.com/stablecoinxyz/privy-demo) for the full implementation
+* Reach out on [Telegram](https://t.me/stablecoin_xyz) for Privy integration support or to access testnet SBC tokens
+* Visit the [SBC Dashboard](https://dashboard.stablecoin.xyz) to get your API key and start building
+* Get Base Sepolia SBC tokens from the [SBC Faucet](https://dashboard.stablecoin.xyz/faucet) for testing
+
+
+## Radius Configuration Reference
+
+Complete reference for configuring Radius in your SBC application.
+
+### Quick Reference
+
+#### Mainnet
+
+| Property            | Value                            |
+| ------------------- | -------------------------------- |
+| **Chain ID**        | `723487`                         |
+| **Chain Name**      | Radius Network                   |
+| **RPC URL**         | `https://rpc.radiustech.xyz`     |
+| **Explorer**        | `https://network.radiustech.xyz` |
+| **Currency Symbol** | RUSD (18 decimals)               |
+| **Gas Price**       | Low, fixed                       |
+
+#### Testnet
+
+| Property            | Value                                |
+| ------------------- | ------------------------------------ |
+| **Chain ID**        | `72344`                              |
+| **Chain Name**      | Radius Testnet                       |
+| **RPC URL**         | `https://rpc.testnet.radiustech.xyz` |
+| **Explorer**        | `https://testnet.radiustech.xyz`     |
+| **Currency Symbol** | RUSD (18 decimals)                   |
+| **Gas Price**       | Low, fixed                           |
+
+### Viem Chain Configuration
+
+#### Mainnet
+
+```typescript
+import { defineChain } from 'viem'
+
+export const radiusMainnet = defineChain({
+  id: 723487,
+  name: 'Radius Network',
+  nativeCurrency: {
+    name: 'RUSD',
+    symbol: 'RUSD',
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.radiustech.xyz']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: 'Radius Explorer',
+      url: 'https://network.radiustech.xyz'
+    }
+  }
+})
+```
+
+#### Testnet
+
+```typescript
+import { defineChain } from 'viem'
+
+export const radiusTestnet = defineChain({
+  id: 72344,
+  name: 'Radius Testnet',
+  nativeCurrency: {
+    name: 'RUSD',
+    symbol: 'RUSD',
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.radiustech.xyz']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: 'Radius Explorer',
+      url: 'https://testnet.radiustech.xyz',
+      apiUrl: 'https://testnet.radiustech.xyz/api'
+    }
+  },
+  testnet: true
+})
+```
+
+> **Note**: For contract addresses and EntryPoint information, see [Radius Overview](/radius/overview).
+
+### SBC AppKit Configuration
+
+#### Minimal Config
+
+```typescript
+import { SbcProvider } from '@stablecoin.xyz/react'
+import { radiusTestnet } from './config/radius'
+
+const config = {
+  apiKey: process.env.VITE_SBC_API_KEY,
+  chain: radiusTestnet
+}
+
+<SbcProvider config={config}>
+  <YourApp />
+</SbcProvider>
+```
+
+#### Full Config
+
+```typescript
+const config = {
+  // Required
+  apiKey: process.env.VITE_SBC_API_KEY,
+  chain: radiusTestnet,
+
+  // Optional: Wallet configuration
+  wallet: 'auto', // 'auto' | 'metamask' | 'coinbase' | 'walletconnect'
+  walletOptions: {
+    autoConnect: false,
+    preferredWallets: ['metamask', 'coinbase']
+  },
+
+  // Optional: Custom RPC
+  rpcUrl: 'https://rpc.testnet.radiustech.xyz',
+
+  // Optional: Debug mode
+  debug: true,
+
+  // Optional: EntryPoint override (usually not needed)
+  entryPoint: {
+    address: '0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F',
+    version: '0.7'
+  }
+}
+```
+
+### Environment Variables
+
+```bash
+# .env file
+
+# Required: SBC API Key
+VITE_SBC_API_KEY=your_api_key_here
+
+# Optional: Chain selection
+VITE_CHAIN=radiusTestnet
+
+# Optional: Custom RPC
+VITE_RPC_URL=https://rpc.testnet.radiustech.xyz
+
+# Optional: EntryPoint override
+VITE_ENTRY_POINT=0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F
+```
+
+### Core SDK Configuration
+
+#### Backend Integration
+
+```typescript
+import { SbcAppKit } from '@stablecoin.xyz/core'
+import { radiusTestnet } from './config/radius'
+
+const appKit = new SbcAppKit({
+  apiKey: process.env.SBC_API_KEY,
+  chain: radiusTestnet,
+  privateKey: process.env.PRIVATE_KEY as Hex
+})
+```
+
+#### With Custom RPC
+
+```typescript
+const appKit = new SbcAppKit({
+  apiKey: process.env.SBC_API_KEY,
+  chain: radiusTestnet,
+  privateKey: process.env.PRIVATE_KEY as Hex,
+  rpcUrl: 'https://rpc.testnet.radiustech.xyz'
+})
+```
+
+### Direct Integration
+
+For direct paymaster integration on Radius, use the API URL format:
+
+```typescript
+const PAYMASTER_API_URL = `https://api.aa.stablecoin.xyz/rpc/v1/radiusTestnet/${SBC_PAYMASTER_API_KEY}`;
+```
+
+See [Direct Integration](/account-abstraction/direct-integration) for full details.
+
+### MetaMask Network Configuration
+
+Users can add Radius to MetaMask manually:
+
+```typescript
+async function addRadiusToMetamask() {
+  try {
+    await window.ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [{
+        chainId: '0x11A98', // 72344 in hex
+        chainName: 'Radius Testnet',
+        nativeCurrency: {
+          name: 'RUSD',
+          symbol: 'RUSD',
+          decimals: 18
+        },
+        rpcUrls: ['https://rpc.testnet.radiustech.xyz'],
+        blockExplorerUrls: ['https://testnet.radiustech.xyz']
+      }]
+    })
+  } catch (error) {
+    console.error('Error adding network:', error)
+  }
+}
+```
+
+### Differences from Base
+
+| Aspect              | Base                        | Radius                            |
+| ------------------- | --------------------------- | --------------------------------- |
+| **EntryPoint**      | Canonical `0x0000...7Da032` | Custom `0xfA15...d7B04F`          |
+| **Smart Account**   | Kernel (ZeroDev)            | SimpleAccount                     |
+| **Gas**             | Standard (varies)           | Low, fixed (\~$0.000093/transfer) |
+| **Currency Symbol** | ETH                         | RUSD                              |
+
+### Migration: Base to Radius
+
+```typescript
+// Switching chains in your app
+import { baseSepolia } from 'viem/chains'
+import { radiusTestnet } from './config/radius'
+
+// Change your config
+const config = {
+  apiKey: process.env.VITE_SBC_API_KEY,
+  chain: isRadius ? radiusTestnet : baseSepolia // Toggle based on environment
+}
+```
+
+### Gas Parameter Configuration
+
+Radius uses fixed gas pricing (\~985998816 wei) instead of EIP-1559. On non-EIP-1559 chains, `maxPriorityFeePerGas` **must equal** `maxFeePerGas`. The SBC AppKit handles this automatically, but if you're constructing UserOperations manually:
+
+```typescript
+// Radius: Fixed gas pricing (no EIP-1559 fee market)
+// maxPriorityFeePerGas MUST equal maxFeePerGas
+const gasPrice = await publicClient.getGasPrice();
+const userOperation = {
+  to: recipient,
+  value: '1000000000000000000',
+  data: '0x',
+  maxFeePerGas: gasPrice,
+  maxPriorityFeePerGas: gasPrice // Must be equal on Radius!
+}
+
+// Base: EIP-1559 supported, priority fee can differ
+const userOperation = {
+  to: recipient,
+  value: '1000000000000000000',
+  data: '0x',
+  maxFeePerGas: '2000000000', // 2 gwei
+  maxPriorityFeePerGas: '1000000000' // 1 gwei
+}
+```
+
+> **Important:** Setting `maxPriorityFeePerGas` to a different value than `maxFeePerGas` on Radius will cause the error: `maxPriorityFeePerGas must equal maxFeePerGas on chains that don't support EIP-1559`
+
+### Troubleshooting
+
+#### Wrong EntryPoint Error
+
+```
+Error: EntryPoint not deployed at canonical address
+```
+
+**Solution**: Ensure you're using the Radius custom EntryPoint:
+
+```typescript
+entryPoint: '0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F'
+```
+
+#### RPC Connection Issues
+
+```typescript
+// Add timeout and retries
+const radiusWithRetry = {
+  ...radiusTestnet,
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.radiustech.xyz'],
+      webSocket: ['wss://rpc.testnet.radiustech.xyz']
+    }
+  }
+}
+```
+
+#### Chain ID Mismatch
+
+```typescript
+// Verify chain ID matches
+if (await walletClient.getChainId() !== 72344) {
+  await walletClient.switchChain({ id: 72344 })
+}
+```
+
+#### Gas Price Parity Error
+
+```
+Error: maxPriorityFeePerGas must equal maxFeePerGas
+```
+
+**Solution**: On Radius, always set `maxPriorityFeePerGas` equal to `maxFeePerGas`. This is a non-EIP-1559 chain. The SBC AppKit v1.6.1+ handles this automatically.
+
+#### Receipt Polling Timeout
+
+If transaction receipt polling times out on Radius, this is likely due to `eth_getLogs` exceeding the block range limit. Radius produces \~1600 blocks/sec, so the block range grows very fast. Use `pimlico_getUserOperationStatus` for polling instead. The SBC AppKit v1.6.1+ handles this automatically.
+
+### Next Steps
+
+* [Getting Started](/radius/getting-started) - Build your first app
+* [Overview](/radius/overview) - Learn about Radius
+* [AppKit Docs](/account-abstraction/app-kit) - Full SDK reference
+* [Direct Integration](/account-abstraction/direct-integration) - Manual paymaster usage
+
+
+## Getting Started on Radius
+
+Build your first gasless application on Radius in under 5 minutes.
+
+### Prerequisites
+
+* Node.js 18+ installed
+* A wallet (MetaMask, Coinbase Wallet, or WalletConnect)
+* An SBC API key from [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz)
+
+### Quick Start: Create Your App
+
+The fastest way to start is using `create-sbc-app`:
+
+```bash
+# Create a new Radius app (testnet)
+npx create-sbc-app my-radius-app --chain radiusTestnet
+
+# Or target Radius mainnet
+npx create-sbc-app my-radius-app --chain radius
+
+# Navigate to your project
+cd my-radius-app
+
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+```
+
+Your app is now running at `http://localhost:5173` with:
+
+* Smart account management
+* Gasless transactions
+* Radius pre-configured
+
+### Manual Setup
+
+#### 1. Install Dependencies
+
+```bash
+npm install @stablecoin.xyz/react @stablecoin.xyz/core viem
+```
+
+#### 2. Configure Radius Chain
+
+Create a file `src/config/radius.ts` with the chain configuration. See [Configuration Reference](/radius/configuration) for the complete setup.
+
+#### 3. Wrap Your App with SBC Provider
+
+```typescript
+// src/App.tsx
+import { SbcProvider, WalletButton } from '@stablecoin.xyz/react'
+import { radiusTestnet } from './config/radius'
+
+const config = {
+  apiKey: import.meta.env.VITE_SBC_API_KEY,
+  chain: radiusTestnet,
+  wallet: 'auto', // Auto-detect available wallets
+  debug: true
+}
+
+function App() {
+  return (
+    <SbcProvider config={config}>
+      <YourApp />
+    </SbcProvider>
+  )
+}
+
+function YourApp() {
+  const { account } = useSbcApp()
+
+  return (
+    <div>
+      <WalletButton>Connect Wallet</WalletButton>
+      {account && (
+        <p>Smart Account: {account.address}</p>
+      )}
+    </div>
+  )
+}
+```
+
+#### 4. Send a Gasless Transaction
+
+```typescript
+// src/components/SendTransaction.tsx
+import { useUserOperation } from '@stablecoin.xyz/react'
+
+function SendTransaction() {
+  const { sendUserOperation, isLoading, isSuccess, error } = useUserOperation()
+
+  const handleSend = async () => {
+    await sendUserOperation({
+      to: '0x742d35Cc6641C4532B4d4c7B4C0D1C3d4e5f6789',
+      value: '1000000000000000000', // 1 RUSD (native)
+      data: '0x'
+    })
+  }
+
+  return (
+    <div>
+      <button onClick={handleSend} disabled={isLoading}>
+        {isLoading ? 'Sending...' : 'Send 1 USD'}
+      </button>
+      {isSuccess && <p>Transaction sent!</p>}
+      {error && <p>Error: {error.message}</p>}
+    </div>
+  )
+}
+```
+
+#### 5. Environment Variables
+
+Create a `.env` file:
+
+```bash
+VITE_SBC_API_KEY=your_api_key_here
+```
+
+### Get Test Tokens
+
+The Radius faucet is available at [https://testnet.radiustech.xyz/wallet](https://testnet.radiustech.xyz/wallet/). You'll need test tokens to interact with contracts on Radius.
+
+### Common Patterns
+
+#### Batch Transactions
+
+Execute multiple operations in a single gasless transaction:
+
+```typescript
+await sendUserOperation({
+  calls: [
+    {
+      to: '0xTokenAddress...',
+      data: '0xa9059cbb...', // transfer(address,uint256)
+      value: 0n
+    },
+    {
+      to: '0xNftAddress...',
+      data: '0x...', // mint function
+      value: 0n
+    },
+    {
+      to: '0xRecipient...',
+      data: '0x',
+      value: 1000000000000000000n
+    }
+  ]
+})
+```
+
+#### Contract Interaction
+
+```typescript
+import { encodeFunctionData, parseAbi } from 'viem'
+
+const usdcAbi = parseAbi([
+  'function transfer(address to, uint256 amount) returns (bool)'
+])
+
+await sendUserOperation({
+  to: '0xUsdcContractAddress...',
+  data: encodeFunctionData({
+    abi: usdcAbi,
+    functionName: 'transfer',
+    args: ['0xRecipient...', 1000000n] // 1 USDC (6 decimals)
+  }),
+  value: 0n
+})
+```
+
+#### Estimate Gas
+
+Preview gas costs before sending:
+
+```typescript
+import { useSbcApp } from '@stablecoin.xyz/react'
+
+function GasEstimate() {
+  const { sbcAppKit } = useSbcApp()
+
+  const estimate = async () => {
+    const estimate = await sbcAppKit.estimateUserOperationGas({
+      to: '0x...',
+      value: '1000000000000000000',
+      data: '0x'
+    })
+    console.log('Gas estimate:', estimate)
+  }
+
+  return <button onClick={estimate}>Estimate Gas</button>
+}
+```
+
+### Switching from Base to Radius
+
+The SBC AppKit handles chain differences automatically. To switch:
+
+```typescript
+// Before (Base Sepolia)
+import { baseSepolia } from 'viem/chains'
+const config = { apiKey, chain: baseSepolia }
+
+// After (Radius)
+import { radiusTestnet } from './config/radius'
+const config = { apiKey, chain: radiusTestnet }
+```
+
+That's it! The SDK automatically:
+
+* Uses the correct EntryPoint address
+* Switches to SimpleAccount (from Kernel)
+* Adjusts for Radius fixed gas pricing (ensures `maxPriorityFeePerGas` equals `maxFeePerGas`)
+* Handles receipt polling via bundler status (avoids `getLogs` block range limits)
+
+### Troubleshooting
+
+#### "Invalid EntryPoint" Error
+
+Make sure you're using the Radius custom EntryPoint:
+
+```typescript
+// Correct: 0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F
+// Wrong: 0x0000000071727De22E5E9d8BAf0edAc6f37da032 (canonical)
+```
+
+#### "Insufficient Balance" Error
+
+Gas fees on Radius are extremely low, but you may need test tokens for contract interactions. Use the [faucet](/radius/overview#get-test-tokens).
+
+#### "Chain Not Configured" Error
+
+Add Radius to MetaMask manually:
+
+```
+Network Name: Radius Testnet
+RPC URL: https://rpc.testnet.radiustech.xyz
+Chain ID: 72344
+Currency Symbol: RUSD
+```
+
+### Next Steps
+
+* [Configuration Reference](/radius/configuration) - All Radius-specific settings
+* [AppKit Documentation](/account-abstraction/app-kit) - Full SDK reference
+* [Use Cases](/use-cases/mass-payment) - Common implementation patterns
+
+### Live Examples
+
+* [React Radius Example](https://github.com/stablecoinxyz/app-kit/tree/main/examples/react-radius) - Full working example
+
+
+## Radius Network
+
+[Radius](https://docs.radiustech.xyz/) is a high-performance, EVM-compatible settlement engine built for the machine-to-machine economy. It offers sub-second finality, stablecoin-native transactions (RUSD), and extremely low fees (\~$0.000093 per transfer) — making micropayments and real-time API metering economically viable.
+
+SBC provides full account abstraction support on both Radius mainnet and testnet, with low, predictable gas fees on both networks.
+
+### Why Radius?
+
+| Feature             | Radius                                      | Base              |
+| ------------------- | ------------------------------------------- | ----------------- |
+| **Gas Cost**        | **Low, predictable (\~$0.000093/transfer)** | Standard gas fees |
+| **Currency Symbol** | RUSD (18 decimals)                          | ETH               |
+| **EntryPoint**      | Custom deployment                           | Canonical v0.7    |
+| **Smart Account**   | SimpleAccount                               | Kernel            |
+
+### Mainnet
+
+#### Network Configuration
+
+```typescript
+// Radius mainnet configuration
+const radiusMainnet = {
+  id: 723487,
+  name: 'Radius Network',
+  nativeCurrency: {
+    name: 'RUSD',
+    symbol: 'RUSD',
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.radiustech.xyz']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: 'Radius Explorer',
+      url: 'https://network.radiustech.xyz'
+    }
+  }
+}
+```
+
+#### Deployed Contracts
+
+| Contract                         | Address                                      | Description                     |
+| -------------------------------- | -------------------------------------------- | ------------------------------- |
+| **EntryPoint**                   | `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F` | Custom ERC-4337 v0.7 EntryPoint |
+| **SimpleAccountFactory**         | `0x7d8fB3E53d345601a02C3214e314f28668510b03` | Smart account factory           |
+| **SignatureVerifyingPaymaster**  | `0xD969454b59F4BC2CF19dC37A37aC10eF6495CD8D` | Gas sponsorship contract        |
+| **SBC**                          | `0x33ad9e4bd16b69b5bfded37d8b5d9ff9aba014fb` | Default stablecoin on Radius    |
+| **PimlicoEntryPointSimulations** | `0x9c69EC9BcB58b9214e14A1966fc03FE004d50c52` | Gas estimation helper           |
+
+### Testnet
+
+#### Network Configuration
+
+```typescript
+// Radius testnet configuration
+const radiusTestnet = {
+  id: 72344,
+  name: 'Radius Testnet',
+  nativeCurrency: {
+    name: 'RUSD',
+    symbol: 'RUSD',
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.radiustech.xyz']
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: 'Radius Explorer',
+      url: 'https://testnet.radiustech.xyz'
+    }
+  },
+  testnet: true
+}
+```
+
+#### Deployed Contracts
+
+| Contract                         | Address                                      | Description                     |
+| -------------------------------- | -------------------------------------------- | ------------------------------- |
+| **EntryPoint**                   | `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F` | Custom ERC-4337 v0.7 EntryPoint |
+| **Paymaster (Proxy)**            | `0xeAe0528eCfa059D96421268dc8FaeC7DcAf5b9F0` | Gas sponsorship contract        |
+| **Paymaster (Impl)**             | `0xd2f8F112A3855Df8A7eDa1Ebe4887a521802458F` | Paymaster implementation        |
+| **SBC**                          | `0x33ad9e4bd16b69b5bfded37d8b5d9ff9aba014fb` | Default stablecoin on Radius    |
+| **PimlicoEntryPointSimulations** | `0xcE77355CD450f1272841cF4aD10a93E65466041C` | Gas estimation helper           |
+
+#### Getting Test Tokens
+
+The Radius faucet is available at [https://testnet.radiustech.xyz/wallet](https://testnet.radiustech.xyz/wallet/). You'll need test tokens to interact with contracts on Radius.
+
+### Key Differences from Base
+
+#### EntryPoint
+
+Radius uses a **custom EntryPoint deployment** instead of the canonical v0.7 address:
+
+```typescript
+// Base (canonical)
+const baseEntryPoint = '0x0000000071727De22E5E9d8BAf0edAc6f37da032'
+
+// Radius (custom — same address on mainnet and testnet)
+const radiusEntryPoint = '0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F'
+```
+
+#### Smart Account Implementation
+
+* **Base**: Uses Kernel smart account (ZeroDev)
+* **Radius**: Uses SimpleAccount (more lightweight)
+
+```typescript
+// The SBC AppKit automatically handles this difference
+// No code changes needed when switching chains
+```
+
+#### Gas
+
+```typescript
+// Radius: Low, predictable gas fees
+await sendUserOperation({
+  to: recipient,
+  value: '1000000000000000000',
+  data: '0x'
+})
+// Fixed gas price (~$0.000093 per transfer)
+```
+
+### Why the Custom EntryPoint?
+
+Radius uses a custom EntryPoint deployment for:
+
+1. **Architectural Sovereignty**: Full control over EntryPoint behavior and upgrades
+2. **Faster Iterations**: Not tied to canonical EntryPoint upgrade cycles
+3. **Cost Optimization**: Optimized gas usage across the network
+
+> **Note**: When deploying to Radius, always use the custom EntryPoint address for the network you're targeting. The canonical EntryPoint will not work.
+
+### Important Caveats
+
+#### Legacy Transactions Only (No EIP-1559)
+
+Radius does not support EIP-1559 transactions. All transactions must use legacy (type 0) format with `gasPrice` instead of `maxFeePerGas`/`maxPriorityFeePerGas`.
+
+When constructing UserOperations, `maxPriorityFeePerGas` **must equal** `maxFeePerGas`. Setting them to different values will cause the transaction to be rejected:
+
+```
+Error: maxPriorityFeePerGas must equal maxFeePerGas on chains that don't support EIP-1559
+```
+
+> **Note:** The SBC AppKit (`@stablecoin.xyz/core` v1.6.1+) handles this automatically.
+
+#### Block Production Speed and `getLogs` Limits
+
+Radius produces blocks extremely fast (\~1600 blocks/sec). This can cause `eth_getLogs` calls to quickly exceed the RPC's block range limit (\~500,000 blocks). Polling for transaction receipts using `getLogs` with a growing block range will fail within seconds. Bounded queries are almost always needed.
+
+The SBC AppKit works around this by using the bundler's `pimlico_getUserOperationStatus` endpoint for receipt polling on Radius chains.
+
+#### RUSD Balance vs `eth_getBalance`
+
+On Radius, `eth_getBalance` returns an inflated value that includes the potential SBC-to-RUSD conversion via the Turnstile mechanism. To check actual RUSD balance, use the `rad_getBalanceRaw` RPC method:
+
+```bash
+cast rpc rad_getBalanceRaw <address> --rpc-url https://rpc.radiustech.xyz
+```
+
+#### CREATE2 Deployment Limitation
+
+The deterministic CREATE2 deployer (`0x4e59b44847b379578588920cA78FbF26c0B4956C`) fails on Radius when deploying contracts with large bytecode. Use direct deployment (`cast send --create`) instead. Contract addresses will not be deterministic but can be configured explicitly.
+
+#### Bundler Configuration
+
+When running an ERC-4337 bundler (e.g., Alto) on Radius, enable legacy transaction mode:
+
+```json
+{
+  "legacy-transactions": true,
+  "entrypoint-simulation-contract-v7": "<deployed-address>"
+}
+```
+
+### Next Steps
+
+* [Getting Started Guide](/radius/getting-started) - Build your first Radius app
+* [Configuration Reference](/radius/configuration) - All Radius-specific configs
+* [SBC AppKit](/account-abstraction/app-kit) - SDK documentation
+* [Use Cases](/use-cases/mass-payment) - Real implementation examples
+
+### External Resources
+
+* **Radius Docs**: [https://docs.radiustech.xyz](https://docs.radiustech.xyz)
+* **Radius Website**: [https://radiustech.xyz](https://radiustech.xyz)
+* **Radius Explorer (Mainnet)**: [https://network.radiustech.xyz](https://network.radiustech.xyz)
+* **Radius Explorer (Testnet)**: [https://testnet.radiustech.xyz](https://testnet.radiustech.xyz)
+* **Radius RPC (Testnet)**: [https://rpc.testnet.radiustech.xyz](https://rpc.testnet.radiustech.xyz)
+
+
+## Zero Gas Mass Payment with SBC
+
+This guide demonstrates how to implement gasless mass payments using SBC's custom paymaster and bundler. With this functionality, you can send SBC tokens to multiple recipients in a single transaction without paying gas fees.
+
+### Prerequisites
+
+* Access to SBC's bundler and paymaster services
+* Sufficient SBC tokens in your wallet
+
+Visit the [SBC Dashboard](https://dashboard.stablecoin.xyz/) to get an API Key as well as SBC on Base Sepolia. Feel free to reach out to us on [Telegram](https://t.me/stablecoin_xyz) to ask any questions.
+
+### Contract Addresses
+
+#### Base Sepolia (Testnet)
+
+* SBC Token: `0xf9FB20B8E097904f0aB7d12e9DbeE88f2dcd0F16`
+
+### How It Works
+
+The SBC MassPayment contract allows you to:
+
+1. Send tokens to multiple recipients in a single transaction
+2. Pay zero gas fees using SBC's paymaster
+3. Support up to 200 recipients in a single operation
+
+We'll send 0.01 SBC to 2 random addresses.
+
+### Implementation Steps
+
+#### 1. Create a SimpleAccount smart account from your wallet (owner)
+
+```typescript
+const owner = createWalletClient({
+  account: owner.address as Hex,
+  chain,
+  transport: custom((window as any).ethereum),
+});
+
+const simpleAccount = await toSimpleSmartAccount({
+  client: localPublicClient,
+  owner: owner,
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+});
+```
+
+#### 2. Create a Paymaster Client from our Paymaster URL
+
+```typescript
+// Visit https://dashboard.stablecoin.xyz to get an API KEY
+const PAYMASTER_API_URL = `https://api.aa.stablecoin.xyz/rpc/v1/baseSepolia/${SBC_PAYMASTER_API_KEY}`;
+const pmClient = createPaymasterClient({
+  transport: http(PAYMASTER_API_URL),
+});
+```
+
+#### 3. Create the Smart Account Bundler Client with our Paymaster Client
+
+```typescript
+const smartAccountClient = createSmartAccountClient({
+  account: simpleAccount,
+  chain: baseSepolia,
+  bundlerTransport: http(PAYMASTER_API_URL),
+  paymaster: pmClient,
+  userOperation: {
+    estimateFeesPerGas: async () => {
+      return {
+        maxFeePerGas: 10n,
+        maxPriorityFeePerGas: 10n,
+      };
+    },
+  },
+});
+```
+
+#### 4. Prepare the calldata
+
+```typescript
+const txs = [
+  {to: "0x124b082e8DF36258198da4Caa3B39c7dFa64D9cE", value: 0.1},
+  {to: "0xB5f6fECd59dAd3d5bA4Dfe8FcCA6617CE71B99f9", value: 0.1}
+];
+
+const decimalPlaces = 6;
+const txnBigInts: { to: string; value: bigint }[] = txs.map((tx) => {
+  return {
+    to: tx.to,
+    value: BigInt(fromReadableAmount(tx.value, decimalPlaces).toString()),
+  };
+});
+
+const SBC_BASE_SEPOLIA_CONTRACT_ADDRESS =
+  "0xf9FB20B8E097904f0aB7d12e9DbeE88f2dcd0F16";
+
+// Build the calls array where you send from owner wallet to each `to` address. 
+// You can get erc20Abi from viem with: import { erc20Abi } from "viem"
+const calls = txnBigInts.map((tx) => {
+  const transferData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: "transferFrom",
+    args: [owner.account.address as Hex, tx.to as Hex, tx.value],
+  });
+  return {
+    from: owner.account.address as Hex,
+    to: SBC_BASE_SEPOLIA_CONTRACT_ADDRESS as Hex,
+    data: transferData,
+  };
+});
+```
+
+#### 5. Compute the Permit Signature
+
+First we'll need a helper function [`getPermitSignature`](https://github.com/stablecoinxyz/masspay/blob/main/src/lib/masspay.ts#L243).
+
+```typescript
+// Sum up the total value of the mass pay
+const totalValue = BigInt(txnBigInts.reduce((acc, tx) => acc + tx.value, 0n));
+
+// Set a 30 min deadline for the signature
+const deadline = Math.floor(Date.now() / 1000) + 60 * 30;
+
+// Get the sender (counterfactual) address of the SimpleAccount
+const senderAddress = simpleAccount.address;
+
+// prepend the permit data instruction
+const signature = await getPermitSignature(
+  chain,
+  owner,
+  SBC_BASE_SEPOLIA_CONTRACT_ADDRESS,
+  owner.address as Hex,
+  senderAddress,
+  totalValue,
+  deadline,
+);
+
+const { r, s, v } = parseSignature(signature);
+
+// Encode the permit transaction calldata
+// Get `erc20PermitAbi`: import erc20PermitAbi from "@openzeppelin/contracts/build/contracts/IERC20Permit.json";
+const permitData = encodeFunctionData({
+  abi: erc20PermitAbi,
+  functionName: "permit",
+  args: [
+    owner.address as Hex,
+    senderAddress,
+    totalValue,
+    deadline,
+    v,
+    r,
+    s,
+  ],
+});
+
+// prepend to the calls array
+calls.unshift({
+  from: owner.account.address as Hex,
+  to: SBC_BASE_SEPOLIA_CONTRACT_ADDRESS as Hex,
+  data: permitData,
+});
+```
+
+6. Send the batch call with our Smart Account Client
+
+```typescript
+const userOpHash = await smartAccountClient.sendUserOperation({
+  calls,
+});
+
+const receipt = await smartAccountClient.waitForUserOperationReceipt({
+  hash: userOpHash,
+})
+
+console.log(`User Op Hash: ${receipt.userOpHash}`)
+```
+
+### Performance Considerations
+
+* **Gas Limits**: Mass payments are gas intensive as the information needed (addresses) take up room in the calldata. Each chain has its own maximum gas per block.
+* **Transaction Limits**: The maximum number of recipients in a single batch is 200.
+
+### Next Steps
+
+* Learn about [NFT Minting](/use-cases/nft-minting) with gasless transactions
+
+
+## Gasless NFT Minting
+
+This guide demonstrates how to mint NFTs without paying gas fees using SBC's custom paymaster and bundler. This approach enables gasless NFT minting experiences for your users on Base and Base Sepolia networks.
+
+### Prerequisites
+
+* Access to SBC's bundler and paymaster services
+
+Visit the [SBC Dashboard](https://dashboard.stablecoin.xyz/) to get an API Key. Feel free to reach out to us on [Telegram](https://t.me/stablecoin_xyz) to ask any questions.
+
+### Contract Addresses
+
+#### Base Sepolia (Testnet)
+
+* SBC Token: `0xf9FB20B8E097904f0aB7d12e9DbeE88f2dcd0F16`
+* Sample NFT: `0xb819edABAEccc6E0eE44371a9A2Df019493DBb58`
+
+The Sample NFT contract is a standard ERC-721 implementation. View its source code [here](https://sepolia.basescan.org/address/0xb819edABAEccc6E0eE44371a9A2Df019493DBb58#code).
+
+### Implementation Steps
+
+#### 1. Create a SimpleAccount smart account from your wallet
+
+```typescript
+const owner = createWalletClient({
+  account: CurrentConfig.account!.address as Hex,
+  chain,
+  transport: custom((window as any).ethereum),
+});
+
+const simpleAccount = await toSimpleSmartAccount({
+  client: localPublicClient,
+  owner: owner,
+  entryPoint: {
+    address: entryPoint07Address,
+    version: "0.7",
+  },
+});
+```
+
+#### 2. Create a Paymaster Client from our Paymaster URL
+
+```typescript
+// Visit https://dashboard.stablecoin.xyz to get an API KEY
+const PAYMASTER_API_URL = `https://api.aa.stablecoin.xyz/rpc/v1/baseSepolia/${SBC_PAYMASTER_API_KEY}`;
+const pmClient = createPaymasterClient({
+  transport: http(PAYMASTER_API_URL),
+});
+```
+
+#### 3. Create the Smart Account Bundler Client with our Paymaster Client
+
+```typescript
+const smartAccountClient = createSmartAccountClient({
+  account: simpleAccount,
+  chain: baseSepolia,
+  bundlerTransport: http(PAYMASTER_API_URL),
+  paymaster: pmClient,
+  userOperation: {
+    estimateFeesPerGas: async () => {
+      return {
+        maxFeePerGas: 10n,
+        maxPriorityFeePerGas: 10n,
+      };
+    },
+  },
+});
+```
+
+#### 4. Encode the calldata for the `mintNFT` function, then send the user operation
+
+```typescript
+const callData = encodeFunctionData({
+  abi: nftAbi,
+  functionName: "mintNFT",
+  args: [smartAccountClient.account.address],
+});
+
+const NFT_CONTRACT_ADDRESS = "0xb819edABAEccc6E0eE44371a9A2Df019493DBb58";
+
+const txHash = await smartAccountClient
+  .sendTransaction({
+    account: smartAccountClient.account,
+    to: NFT_CONTRACT_ADDRESS,
+    data: callData,
+  })
+  .catch((error) => {
+    console.error("\x1b[31m", `❌ ${error.message}`);
+    process.exit(1);
+  });
+
+console.log("                                       ");
+console.log("                                       ");
+console.debug("NFT Minted! Transaction Hash:", txHash);
+console.log("                                       ");
+console.log("                                       ");
+
+```
+
+### Next Steps
+
+* Learn about [Zero gas Mass Payment](/use-cases/mass-payment) functionality
+
+
+## Gasless USDC-SBC Swap
+
+This guide demonstrates how to implement a gasless swap between USDC and SBC tokens using SBC's custom paymaster and bundler. Users can swap tokens without needing ETH for gas fees.
+
+### Prerequisites
+
+* Access to SBC's bundler and paymaster services.
+* SBC tokens in your wallet (or testnet SBC for Base Sepolia)
+
+Reach out to us on [Telegram](https://t.me/stablecoin_xyz) to access our Paymaster and Bundler, or to get some SBC on Base Sepolia to test things out.
+
+### Contract Addresses
+
+#### Base Mainnet
+
+* USDC Token: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
+* SBC Token: `0xfdcC3dd6671eaB0709A4C0f3F53De9a333d80798`
+* SBC Swap Router: `0x<SBC_SWAP_ROUTER_ADDRESS>`
+
+### Implementation Steps
+
+#### 1. Set up Contract Interfaces
+
+```typescript
+import { ethers } from 'ethers';
+import { SBCAccountAPI, SBCBundlerAPI, SBCPaymasterAPI } from '@sbc/account-abstraction-sdk';
+
+// Token ABI (simplified)
+const tokenAbi = [
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function balanceOf(address account) view returns (uint256)',
+  'function decimals() view returns (uint8)'
+];
+
+// Swap Router ABI
+const swapRouterAbi = [
+  'function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline) returns (uint256[] memory amounts)'
+];
+
+// Initialize contracts
+const provider = new ethers.providers.JsonRpcProvider('https://mainnet.base.org'); // or Sepolia
+const usdc = new ethers.Contract('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', tokenAbi, provider);
+const sbc = new ethers.Contract('0x<SBC_CONTRACT_ADDRESS>', tokenAbi, provider);
+const swapRouter = new ethers.Contract('0x<SBC_SWAP_ROUTER_ADDRESS>', swapRouterAbi, provider);
+```
+
+#### 2. Initialize Account Abstraction APIs
+
+```typescript
+// Initialize SBC's bundler and paymaster
+const bundlerAPI = new SBCBundlerAPI('https://bundler.sbc.io/base', 'your-api-key');
+const paymasterAPI = new SBCPaymasterAPI('https://paymaster.sbc.io/base', 'your-api-key');
+
+// Set up account
+const accountAPI = new SBCAccountAPI({
+  provider,
+  entryPointAddress: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+  owner, // Your EOA
+  factoryAddress: '0x<SBC_FACTORY_ADDRESS>',
+  paymasterAPI,
+  bundlerAPI,
+});
+
+// Get wallet address
+const walletAddress = await accountAPI.getCounterfactualAddress();
+console.log('Smart contract wallet address:', walletAddress);
+```
+
+#### 3. Check Token Balances
+
+```typescript
+// Check USDC balance
+const usdcDecimals = await usdc.decimals();
+const usdcBalance = await usdc.balanceOf(walletAddress);
+console.log('USDC Balance:', ethers.utils.formatUnits(usdcBalance, usdcDecimals));
+
+// Check SBC balance
+const sbcDecimals = await sbc.decimals();
+const sbcBalance = await sbc.balanceOf(walletAddress);
+console.log('SBC Balance:', ethers.utils.formatUnits(sbcBalance, sbcDecimals));
+```
+
+#### 4. Approve Router to Spend USDC
+
+First, we need to approve the swap router to spend USDC on behalf of our wallet:
+
+```typescript
+// Amount to swap (e.g., 10 USDC)
+const amountToSwap = ethers.utils.parseUnits('10', usdcDecimals);
+
+// Encode approval transaction
+const approveCalldata = usdc.interface.encodeFunctionData('approve', [
+  swapRouter.address,
+  amountToSwap
+]);
+
+// Create and send approval UserOperation
+const approveOp = await accountAPI.createSignedUserOp({
+  target: usdc.address,
+  data: approveCalldata,
+  value: 0,
+});
+
+console.log('Sending approval transaction...');
+const approveOpHash = await bundlerAPI.sendUserOpToBundler(approveOp);
+console.log('Approval UserOp hash:', approveOpHash);
+
+// Wait for the operation to be mined
+await accountAPI.getUserOpReceipt(approveOpHash);
+console.log('Approval completed');
+```
+
+#### 5. Execute the Swap
+
+Now we can perform the actual swap:
+
+```typescript
+// Calculate minimum amount to receive (with 1% slippage)
+const amountOutMin = amountToSwap.mul(99).div(100); // 1% slippage
+
+// Set deadline 10 minutes from now
+const deadline = Math.floor(Date.now() / 1000) + 10 * 60;
+
+// Encode swap transaction
+const swapCalldata = swapRouter.interface.encodeFunctionData('swapExactTokensForTokens', [
+  amountToSwap,
+  amountOutMin,
+  [usdc.address, sbc.address], // Path: USDC -> SBC
+  walletAddress,
+  deadline
+]);
+
+// Create and send swap UserOperation
+const swapOp = await accountAPI.createSignedUserOp({
+  target: swapRouter.address,
+  data: swapCalldata,
+  value: 0,
+});
+
+console.log('Sending swap transaction...');
+const swapOpHash = await bundlerAPI.sendUserOpToBundler(swapOp);
+console.log('Swap UserOp hash:', swapOpHash);
+
+// Wait for the operation to be mined
+const swapReceipt = await accountAPI.getUserOpReceipt(swapOpHash);
+console.log('Swap completed:', swapReceipt);
+```
+
+#### 6. Verify New Balances
+
+After the swap, check your new token balances:
+
+```typescript
+// Check USDC balance after swap
+const newUsdcBalance = await usdc.balanceOf(walletAddress);
+console.log('New USDC Balance:', ethers.utils.formatUnits(newUsdcBalance, usdcDecimals));
+
+// Check SBC balance after swap
+const newSbcBalance = await sbc.balanceOf(walletAddress);
+console.log('New SBC Balance:', ethers.utils.formatUnits(newSbcBalance, sbcDecimals));
+```
+
+### Complete Example
+
+Here's a complete function that performs a gasless USDC-SBC swap:
+
+```typescript
+async function swapUsdcToSbc(amountUsdcStr) {
+  try {
+    // Initialize
+    const provider = new ethers.providers.JsonRpcProvider('https://mainnet.base.org');
+    const bundlerAPI = new SBCBundlerAPI('https://bundler.sbc.io/base', 'your-api-key');
+    const paymasterAPI = new SBCPaymasterAPI('https://paymaster.sbc.io/base', 'your-api-key');
+    
+    const usdc = new ethers.Contract('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', tokenAbi, provider);
+    const sbc = new ethers.Contract('0x<SBC_CONTRACT_ADDRESS>', tokenAbi, provider);
+    const swapRouter = new ethers.Contract('0x<SBC_SWAP_ROUTER_ADDRESS>', swapRouterAbi, provider);
+    
+    const accountAPI = new SBCAccountAPI({
+      provider,
+      entryPointAddress: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+      owner, // Your EOA
+      factoryAddress: '0x<SBC_FACTORY_ADDRESS>',
+      paymasterAPI,
+      bundlerAPI,
+    });
+    
+    const walletAddress = await accountAPI.getCounterfactualAddress();
+    
+    // Convert amount to proper units
+    const usdcDecimals = await usdc.decimals();
+    const amountToSwap = ethers.utils.parseUnits(amountUsdcStr, usdcDecimals);
+    
+    // Check if we have enough USDC
+    const usdcBalance = await usdc.balanceOf(walletAddress);
+    if (usdcBalance.lt(amountToSwap)) {
+      throw new Error(`Insufficient USDC balance. Have: ${ethers.utils.formatUnits(usdcBalance, usdcDecimals)}, Need: ${amountUsdcStr}`);
+    }
+    
+    // 1. Approve USDC
+    const approveCalldata = usdc.interface.encodeFunctionData('approve', [
+      swapRouter.address,
+      amountToSwap
+    ]);
+    
+    const approveOp = await accountAPI.createSignedUserOp({
+      target: usdc.address,
+      data: approveCalldata,
+      value: 0,
+    });
+    
+    const approveOpHash = await bundlerAPI.sendUserOpToBundler(approveOp);
+    await accountAPI.getUserOpReceipt(approveOpHash);
+    
+    // 2. Execute swap
+    const amountOutMin = amountToSwap.mul(99).div(100); // 1% slippage
+    const deadline = Math.floor(Date.now() / 1000) + 10 * 60;
+    
+    const swapCalldata = swapRouter.interface.encodeFunctionData('swapExactTokensForTokens', [
+      amountToSwap,
+      amountOutMin,
+      [usdc.address, sbc.address], // Path: USDC -> SBC
+      walletAddress,
+      deadline
+    ]);
+    
+    const swapOp = await accountAPI.createSignedUserOp({
+      target: swapRouter.address,
+      data: swapCalldata,
+      value: 0,
+    });
+    
+    const swapOpHash = await bundlerAPI.sendUserOpToBundler(swapOp);
+    const swapReceipt = await accountAPI.getUserOpReceipt(swapOpHash);
+    
+    // 3. Verify new balances
+    const newSbcBalance = await sbc.balanceOf(walletAddress);
+    const sbcDecimals = await sbc.decimals();
+    
+    console.log('Swap completed!');
+    console.log(`Spent: ${amountUsdcStr} USDC`);
+    console.log(`Received: ${ethers.utils.formatUnits(newSbcBalance, sbcDecimals)} SBC`);
+    
+    return {
+      success: true,
+      txHash: swapReceipt.receipt.transactionHash,
+      sbcAmount: ethers.utils.formatUnits(newSbcBalance, sbcDecimals)
+    };
+  } catch (error) {
+    console.error('Swap failed:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+// Usage
+swapUsdcToSbc('10').then(result => {
+  if (result.success) {
+    console.log(`Successfully swapped for ${result.sbcAmount} SBC!`);
+    console.log(`Transaction hash: ${result.txHash}`);
+  } else {
+    console.error(`Swap failed: ${result.error}`);
+  }
+});
+```
+
+### Web Integration Example
+
+Here's a simplified example of integrating the swap functionality in a web application:
+
+```jsx
+import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import { SBCAccountAPI, SBCBundlerAPI, SBCPaymasterAPI } from '@sbc/account-abstraction-sdk';
+
+function SwapComponent() {
+  const [amount, setAmount] = useState('');
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  async function handleSwap() {
+    setLoading(true);
+    setStatus('Initializing swap...');
+    
+    try {
+      // Connect to wallet
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const owner = await signer.getAddress();
+      
+      // Initialize SBC services
+      const bundlerAPI = new SBCBundlerAPI('https://bundler.sbc.io/base', 'your-api-key');
+      const paymasterAPI = new SBCPaymasterAPI('https://paymaster.sbc.io/base', 'your-api-key');
+      
+      // Set up account
+      const accountAPI = new SBCAccountAPI({
+        provider,
+        entryPointAddress: '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+        owner,
+        factoryAddress: '0x<SBC_FACTORY_ADDRESS>',
+        paymasterAPI,
+        bundlerAPI,
+      });
+      
+      // Get wallet address
+      const walletAddress = await accountAPI.getCounterfactualAddress();
+      
+      // Follow steps 3-6 from the implementation above...
+      setStatus('Approving USDC...');
+      // Approval code
+      
+      setStatus('Swapping tokens...');
+      // Swap code
+      
+      setStatus('Swap completed! You received X SBC tokens.');
+    } catch (error) {
+      console.error('Swap error:', error);
+      setStatus(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  return (
+    <div>
+      <h2>Swap USDC to SBC</h2>
+      <div>
+        <input
+          type="text"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Amount in USDC"
+        />
+        <button onClick={handleSwap} disabled={loading || !amount}>
+          {loading ? 'Processing...' : 'Swap'}
+        </button>
+      </div>
+      <div>{status}</div>
+    </div>
+  );
+}
+
+export default SwapComponent;
+```
+
+### Considerations for Production
+
+When implementing this in production:
+
+1. **Error Handling**: Implement proper error handling and retry mechanisms
+2. **Slippage Protection**: Allow users to configure their slippage tolerance
+3. **Price Quotation**: Fetch current price quotes before executing swaps
+4. **Gas Estimation**: Monitor gas conditions for optimal transaction timing
+5. **User Experience**: Provide feedback at each step of the process
+6. **Security**: Validate inputs and protect against common attack vectors
+
+### Next Steps
+
+* Learn how to implement [Mass Payment](/use-cases/mass-payment) functionality
+* Explore [NFT Minting](/use-cases/nft-minting) with gasless transactions
+
+
+## x402 facilitator
+
+the sbc facilitator is a hosted service that verifies and settles x402 payments. it never holds funds — it receives a signed authorization from the payer and executes the on-chain transfer atomically.
+
+**base url:** `[https://x402.stablecoin.xyz](https://x402.stablecoin.xyz)`
+
+**mainnet requires an api key** (`x-api-key` header). get yours at [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz). testnet is open.
+
+***
+
+### using the sdk
+
+`facilitatorclient` is the sdk wrapper around the http api. you rarely need to call it directly — `x402middleware` and `createx402client` use it internally — but it's useful for custom integrations.
+
+```typescript
+import { facilitatorclient } from '@stablecoin.xyz/x402'
+
+const facilitator = new facilitatorclient({
+  apikey: process.env.api_key,     // required for mainnet
+  facilitatorurl: 'https://x402.stablecoin.xyz',  // default
+})
+
+// verify without settling
+const result = await facilitator.verify(paymentpayload, paymentrequirements)
+// { isvalid: true, payer: '0x...', invalidreason: null }
+
+// verify + settle (executes on-chain transfer)
+const settled = await facilitator.settle(paymentpayload, paymentrequirements)
+// { success: true, transaction: '0xtxhash', network: 'eip155:8453', payer: '0x...' }
+```
+
+***
+
+### http api
+
+#### `get /supported`
+
+returns supported networks and facilitator signer addresses. no auth required.
+
+```bash
+curl https://x402.stablecoin.xyz/supported
+```
+
+```json
+{
+  "kinds": ["exact"],
+  "networks": [
+    "eip155:8453",
+    "eip155:84532",
+    "eip155:723487",
+    "eip155:72344",
+    "solana:5eykt4usfv8p8njdtrepy1vzqkqzkvdp"
+  ],
+  "signers": {
+    "eip155:*": ["0xdee710bb6a3b652c35b5cb74e7bdb03ee1f641e6"],
+    "solana:*": ["2msjkvjzrgxcipq3ddjcijbepugfnsjcn1yvn2tgdw5k"]
+  }
+}
+```
+
+***
+
+#### `post /verify`
+
+verifies a payment payload without executing it on-chain. checks signature validity, amount, deadline, and payer balance.
+
+**headers:**
+
+* `content-type: application/json`
+* `x-api-key: sbc-...` *(mainnet only)*
+
+**request:**
+
+```json
+{
+  "paymentpayload": {
+    "x402version": 2,
+    "accepted": { "scheme": "exact", "network": "eip155:8453" },
+    "payload": {
+      "signature": "0x...",
+      "authorization": {
+        "from": "0xpayer",
+        "to": "0xfacilitator",
+        "value": "1000000000000000",
+        "validafter": "0",
+        "validbefore": "1700000000",
+        "nonce": "0"
+      }
+    }
+  },
+  "paymentrequirements": {
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "maxamountrequired": "1000000000000000",
+    "asset": "0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798",
+    "payto": "0xmerchant",
+    "maxtimeoutseconds": 300,
+    "extra": { "name": "stable coin", "version": "1" }
+  }
+}
+```
+
+**response:**
+
+```json
+{ "isvalid": true, "payer": "0xpayer", "invalidreason": null }
+```
+
+***
+
+#### `post /settle`
+
+executes the on-chain transfer. for evm: calls `permit()` + `transferfrom()`. for solana: executes the delegated spl transfer.
+
+same request format as `/verify`. response:
+
+```json
+{
+  "success": true,
+  "transaction": "0xtxhash",
+  "network": "eip155:8453",
+  "payer": "0xpayer"
+}
+```
+
+***
+
+#### `get /health`
+
+```bash
+curl https://x402.stablecoin.xyz/health
+# {"status":"ok","service":"sbc x402 facilitator"}
+```
+
+***
+
+### network reference
+
+| network        | caip-2                                    | status         | decimals | sbc token                                      |
+| -------------- | ----------------------------------------- | -------------- | -------- | ---------------------------------------------- |
+| base           | `eip155:8453`                             | mainnet        | 18       | `0xfdcc3dd6671eab0709a4c0f3f53de9a333d80798`   |
+| base sepolia   | `eip155:84532`                            | testnet (free) | 6        | `0xf9fb20b8e097904f0ab7d12e9dbee88f2dcd0f16`   |
+| radius         | `eip155:723487`                           | mainnet        | 6        | `0x33ad9e4bd16b69b5bfded37d8b5d9ff9aba014fb`   |
+| radius testnet | `eip155:72344`                            | testnet (free) | 6        | `0x33ad9e4bd16b69b5bfded37d8b5d9ff9aba014fb`   |
+| solana         | `solana:5eykt4usfv8p8njdtrepy1vzqkqzkvdp` | mainnet        | 9        | `dbazbuxalj1qancseupzz4sp9f8d2sc78c4vkjhbtgma` |
+
+active mainnet networks (`base`, `radius`, `solana`) require an api key. testnet networks are open.
+
+***
+
+### payment mechanisms
+
+#### evm — erc-2612 permit
+
+the payer signs an off-chain eip-712 `permit` message authorizing the facilitator to transfer sbc on their behalf. the payer pays no gas.
+
+the facilitator calls:
+
+1. `token.permit(owner, spender, value, deadline, v, r, s)`
+2. `token.transferfrom(owner, payto, value)`
+
+both happen atomically in a single transaction. the facilitator pays the gas.
+
+#### solana — delegated spl transfer
+
+the payer signs an off-chain ed25519 message with the format:
+
+```
+from:{from}|to:{to}|amount:{amount}|nonce:{nonce}|deadline:{deadline}
+```
+
+the facilitator executes `token.transferchecked()` using a pre-approved spl token delegation.
+
+**one-time setup required per payer wallet.** the payer must approve the facilitator address as a delegate for their sbc token account:
+
+```bash
+# using @solana/spl-token cli
+spl-token approve \
+  <your_sbc_token_account> \
+  <amount> \
+  2msjkvjzrgxcipq3ddjcijbepugfnsjcn1yvn2tgdw5k
+```
+
+or programmatically using the sdk example:
+
+```bash
+# in examples/solana-demo/
+cp .env.example .env   # add solana_private_key
+pnpm approve           # runs approve-delegate.ts once
+```
+
+the facilitator address is `2msjkvjzrgxcipq3ddjcijbepugfnsjcn1yvn2tgdw5k`.
+
+:::note
+the facilitator never holds funds. it receives a signed authorization from the payer and executes the transfer atomically. on evm: `permit()` + `transferfrom()` in one transaction. on solana: a single `transferchecked()` call.
+:::
+
+***
+
+### self-hosting
+
+the facilitator is open source: [github.com/stablecoinxyz/x402-facilitator](https://github.com/stablecoinxyz/x402-facilitator)
+
+```bash
+git clone https://github.com/stablecoinxyz/x402-facilitator
+cp .env.example .env
+npm install
+npm run dev
+```
+
+key environment variables:
+
+| variable                | description                                                               |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `evm_private_key`       | facilitator signer key for evm networks                                   |
+| `solana_private_key`    | facilitator signer key for solana                                         |
+| `dashboard_url`         | api key validation endpoint (default: `https://dashboard.stablecoin.xyz`) |
+| `enable_api_key_gating` | set `false` to disable api key requirement (default: `true`)              |
+| `port`                  | server port (default: `3000`)                                             |
+
+**x402 v2 compatibility:** 36/36 spec checks passing. see [compatibility.md](https://github.com/stablecoinxyz/x402-facilitator/blob/main/x402-compatibility.md).
+
+
+## x402 Payments
+
+Gate any HTTP endpoint behind a stablecoin payment. Payers sign off-chain — no gas fees on EVM, no pre-approval required. Your server middleware handles verification and settlement in one call.
+
+Works on **Radius**, **Base**, and **Solana** today. Use the hosted facilitator at `x402.stablecoin.xyz` — no infrastructure to run.
+
+```bash
+npm install @stablecoin.xyz/x402
+```
+
+### How it works
+
+**Server** — add one middleware call to gate your endpoint:
+
+```typescript
+import { x402Middleware } from '@stablecoin.xyz/x402/middleware/express'
+
+app.get('/premium', x402Middleware({
+  payTo: '0xYourAddress',
+  amount: '1000', // 0.001 SBC (6 decimals on Radius)
+  network: 'radius',
+  apiKey: process.env.API_KEY,
+}), handler)
+```
+
+**Client** — `client.fetch` is a drop-in for `fetch`. It handles the 402, signs the payment, and retries automatically:
+
+```typescript
+import { createX402Client, viemSignerAdapter } from '@stablecoin.xyz/x402/evm'
+
+const client = createX402Client({ signer: viemSignerAdapter(walletClient), network: 'radius' })
+const res = await client.fetch('https://api.example.com/premium')
+```
+
+The payment flow:
+
+```
+Client                     Your Server              x402.stablecoin.xyz
+  │                             │                           │
+  ├──── GET /premium ──────────►│                           │
+  │◄─── 402 + payment terms ────┤                           │
+  │                             │                           │
+  │  (signs off-chain, no gas)  │                           │
+  │                             │                           │
+  ├──── GET /premium ──────────►│                           │
+  │     + PAYMENT-SIGNATURE     ├──── verify + settle ─────►│
+  │                             │◄─── tx confirmed ─────────┤
+  │◄─── 200 + your data ────────┤                           │
+```
+
+The facilitator executes the on-chain transfer. Your route handler only runs after payment is confirmed.
+
+### Networks
+
+```typescript
+type NetworkKey =
+  | 'radius'         // Radius mainnet    — 6 decimals
+  | 'radius-testnet' // Radius testnet    — 6 decimals  (testnet, free)
+  | 'base'           // Base mainnet     — 18 decimals
+  | 'base-sepolia'   // Base Sepolia      — 6 decimals  (testnet, free)
+  | 'solana'         // Solana mainnet    — 9 decimals
+  | 'solana-devnet'  // Solana Devnet     — 9 decimals  (testnet, free)
+```
+
+| Network        | Key              | Decimals | Status         |
+| -------------- | ---------------- | -------- | -------------- |
+| Radius         | `radius`         | 6        | Mainnet        |
+| Radius Testnet | `radius-testnet` | 6        | Testnet (free) |
+| Base           | `base`           | 18       | Mainnet        |
+| Base Sepolia   | `base-sepolia`   | 6        | Testnet (free) |
+| Solana         | `solana`         | 9        | Mainnet        |
+| Solana Devnet  | `solana-devnet`  | 9        | Testnet (free) |
+
+Testnet networks require no API key. Start on `radius-testnet`, `base-sepolia`, or `solana-devnet` to test without real funds.
+
+### Hosted facilitator
+
+SBC runs a hosted facilitator — no infrastructure to deploy or maintain.
+
+|               | Value                                          |
+| ------------- | ---------------------------------------------- |
+| URL           | `https://x402.stablecoin.xyz`                  |
+| EVM signer    | `0xdeE710bB6a3b652C35B5cB74E7bdb03EE1F641E6`   |
+| Solana signer | `2mSjKVjzRGXcipq3DdJCijbepugfNSJCN1yVN2tgdw5K` |
+
+Mainnet networks (`base`, `radius`, `solana`) require an API key passed as the `X-API-Key` header.
+Get yours at [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz).
+
+:::note
+The facilitator never holds funds. It receives a signed authorization from the payer and executes the on-chain transfer atomically. On EVM this is `permit()` + `transferFrom()` in a single transaction.
+:::
+
+### Next
+
+* [SDK →](/x402/sdk) — integrate as a server (middleware) or client
+* [Facilitator API →](/x402/facilitator) — HTTP reference and self-hosting
+
+
+## @stablecoin.xyz/x402 SDK
+
+```bash
+npm install @stablecoin.xyz/x402
+```
+
+**[npm →](https://www.npmjs.com/package/@stablecoin.xyz/x402)**
+
+:::tip
+**Prerequisites**
+
+* Node.js 18+
+* An SBC wallet address to receive payments (server) or SBC token balance (client)
+* Testnet tokens: [testnet.radiustech.xyz/wallet](https://testnet.radiustech.xyz/wallet) (Radius) or [dashboard.stablecoin.xyz/faucet](https://dashboard.stablecoin.xyz/faucet) (Base Sepolia) — free, no API key needed
+* Mainnet API key: [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz)
+:::
+
+***
+
+### I'm building a server (gate my API)
+
+:::code-group
+```typescript [Express]
+import express from 'express'
+import { x402Middleware } from '@stablecoin.xyz/x402/middleware/express'
+
+const app = express()
+
+app.get('/premium',
+  x402Middleware({
+    payTo: '0xYourAddress',
+    amount: '1000000',           // 1 SBC (6 decimals)
+    network: 'radius-testnet',   // testnet — no API key required
+  }),
+  (req, res) => {
+    res.json({ data: 'you paid for this' })
+  }
+)
+```
+
+```typescript [Next.js App Router]
+import { withX402 } from '@stablecoin.xyz/x402/middleware/nextjs'
+
+async function handler(request: Request) {
+  return Response.json({ data: 'you paid for this' })
+}
+
+export const GET = withX402({
+  payTo: '0xYourAddress',
+  amount: '1000000',
+  network: 'radius-testnet',
+}, handler)
+```
+:::
+
+For mainnet, add `apiKey`:
+
+```typescript
+x402Middleware({
+  payTo: '0xYourAddress',
+  amount: '1000',              // 0.001 SBC (6 decimals on Radius)
+  network: 'radius',
+  apiKey: process.env.API_KEY,
+})
+```
+
+#### Accept multiple networks
+
+Let clients pay in any network you support:
+
+```typescript
+x402Middleware([
+  { payTo: '0xYourEVMAddress',  amount: '1000000',          network: 'radius', apiKey: process.env.API_KEY },
+  { payTo: '0xYourEVMAddress',  amount: '1000000000000000', network: 'base',   apiKey: process.env.API_KEY },
+  { payTo: 'YourSolanaAddress', amount: '1000000000',       network: 'solana', apiKey: process.env.API_KEY },
+])
+```
+
+The client picks whichever network it supports. Your server accepts either.
+
+***
+
+### I'm building a client (pay for APIs)
+
+#### EVM
+
+:::code-group
+```typescript [viem]
+import { createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { createX402Client, viemSignerAdapter } from '@stablecoin.xyz/x402/evm'
+import { radiusMainnet } from './config/radius' // see /radius/configuration
+
+const walletClient = createWalletClient({
+  account: privateKeyToAccount(process.env.PRIVATE_KEY as `0x${string}`),
+  chain: radiusMainnet,
+  transport: http(),
+})
+
+const client = createX402Client({
+  signer: viemSignerAdapter(walletClient),
+  network: 'radius',
+  apiKey: process.env.API_KEY,
+})
+
+// drop-in for fetch — handles 402, signs off-chain, retries automatically
+const response = await client.fetch('https://api.example.com/premium')
+const data = await response.json()
+
+if (response.paymentResult) {
+  console.log('tx:', response.paymentResult.txHash)
+  console.log('paid:', response.paymentResult.amountPaid)
+}
+```
+
+```typescript [ethers.js]
+import { createX402Client, ethersSignerAdapter } from '@stablecoin.xyz/x402/evm'
+
+const client = createX402Client({
+  signer: ethersSignerAdapter(ethersSigner),  // ethers.js v5 or v6
+  network: 'radius',
+  apiKey: process.env.API_KEY,
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+:::
+
+#### Solana
+
+```bash
+npm install @stablecoin.xyz/x402 @solana/web3.js
+```
+
+```typescript
+import { createSolanaX402Client, keypairSignerAdapter } from '@stablecoin.xyz/x402/solana'
+import { Keypair } from '@solana/web3.js'
+
+const keypair = Keypair.fromSecretKey(/* your key bytes */)
+
+const client = createSolanaX402Client({
+  signer: keypairSignerAdapter(keypair),
+  network: 'solana-devnet',  // testnet — no API key required
+})
+
+const response = await client.fetch('https://api.example.com/premium')
+```
+
+:::note
+**Solana one-time setup:** The payer wallet must approve the facilitator as an SPL token delegate before the first payment. See [Facilitator → Solana setup](/x402/facilitator#payment-mechanisms).
+:::
+
+#### React hook
+
+```bash
+npm install @stablecoin.xyz/x402 viem react
+```
+
+```typescript
+import { useX402, viemSignerAdapter } from '@stablecoin.xyz/x402/react'
+
+function PremiumButton({ walletClient }) {
+  const { fetch, paying } = useX402({
+    signer: walletClient ? viemSignerAdapter(walletClient) : null,
+    network: 'radius-testnet',
+  })
+
+  async function loadData() {
+    const res = await fetch('https://api.example.com/premium')
+    console.log(await res.json())
+  }
+
+  return (
+    <button onClick={loadData} disabled={paying}>
+      {paying ? 'Paying...' : 'Get Premium Data'}
+    </button>
+  )
+}
+```
+
+The `useX402` hook integrates directly with SBC AppKit — `walletClient` from `useSbcApp()` is a standard viem `WalletClient` and works as-is.
+
+***
+
+### API Reference
+
+#### `createX402Client(options)`
+
+| Option             | Type                                    | Default                       | Description                              |
+| ------------------ | --------------------------------------- | ----------------------------- | ---------------------------------------- |
+| `signer`           | `EvmSigner`                             | required                      | Adapter wrapping your wallet (see below) |
+| `network`          | [`NetworkKey`](/x402/overview#networks) | `'base-sepolia'`              | Network to pay on                        |
+| `apiKey`           | `string`                                | —                             | Required for mainnet                     |
+| `facilitatorUrl`   | `string`                                | `https://x402.stablecoin.xyz` | Self-hosted override                     |
+| `rpcUrl`           | `string`                                | —                             | RPC for balance pre-check                |
+| `skipBalanceCheck` | `boolean`                               | `false`                       | Skip pre-flight balance check            |
+
+#### `createSolanaX402Client(options)`
+
+| Option    | Type                                    | Default           | Description                     |
+| --------- | --------------------------------------- | ----------------- | ------------------------------- |
+| `signer`  | `SolanaSigner`                          | required          | Adapter wrapping your keypair   |
+| `network` | [`NetworkKey`](/x402/overview#networks) | `'solana-devnet'` | `'solana'` or `'solana-devnet'` |
+| `apiKey`  | `string`                                | —                 | Required for mainnet            |
+
+#### `x402Middleware(options)` / `withX402(options, handler)`
+
+| Option              | Type                                    | Default                       | Description                                                                   |
+| ------------------- | --------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| `payTo`             | `string`                                | required                      | Recipient address                                                             |
+| `amount`            | `string`                                | required                      | Amount in atomic units (see [Networks](/x402/overview#networks) for decimals) |
+| `network`           | [`NetworkKey`](/x402/overview#networks) | required                      | e.g. `'radius'`, `'base'`, `'solana'`                                         |
+| `apiKey`            | `string`                                | —                             | Required for mainnet                                                          |
+| `settle`            | `boolean`                               | `true`                        | Set `false` to verify only (no on-chain settlement)                           |
+| `maxTimeoutSeconds` | `number`                                | `300`                         | Seconds the client has to submit payment                                      |
+| `facilitatorUrl`    | `string`                                | `https://x402.stablecoin.xyz` | Self-hosted override                                                          |
+
+#### EVM signer adapters
+
+```typescript
+import { viemSignerAdapter, ethersSignerAdapter } from '@stablecoin.xyz/x402/evm'
+
+viemSignerAdapter(walletClient)    // viem WalletClient (EOA, smart account, embedded wallet)
+ethersSignerAdapter(signer)        // ethers.js v5 or v6 Signer
+```
+
+#### Solana signer adapters
+
+```typescript
+import { keypairSignerAdapter, walletAdapterSignerAdapter } from '@stablecoin.xyz/x402/solana'
+
+keypairSignerAdapter(keypair)               // @solana/web3.js Keypair (server-side)
+walletAdapterSignerAdapter(walletAdapter)   // @solana/wallet-adapter-base (browser)
+```
+
+***
+
+### Troubleshooting
+
+**My endpoint returned 402 but the client didn't pay**
+
+You're using native `fetch`. Replace with `client.fetch` from `createX402Client` or `createSolanaX402Client` — it handles the 402 response, signs the payment, and retries automatically.
+
+***
+
+**`401 Unauthorized` from the facilitator**
+
+`apiKey` is missing. Mainnet networks (`radius`, `base`, `solana`) require an API key. Get one at [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz) and pass it as `apiKey` in your options.
+
+***
+
+**`403 Forbidden` from the facilitator**
+
+Your API key is invalid, inactive, or revoked. Verify it in the dashboard.
+
+***
+
+**Payment rejected: insufficient balance**
+
+Your wallet doesn't have enough SBC. For testnet, get free tokens at [testnet.radiustech.xyz/wallet](https://testnet.radiustech.xyz/wallet) (Radius) or [dashboard.stablecoin.xyz/faucet](https://dashboard.stablecoin.xyz/faucet) (Base Sepolia). For mainnet, acquire SBC on the respective network.
+
+***
+
+**Solana: payment rejected immediately**
+
+The payer wallet hasn't approved the facilitator as an SPL token delegate. This is a one-time step per wallet. See [Facilitator → Solana setup](/x402/facilitator#payment-mechanisms).
+
+***
+
+**Payment rejected: amount mismatch**
+
+Check decimals. Base mainnet uses **18 decimals** — `1000000000000000000` = 1 SBC. All other networks use 6 or 9 decimals. See [Networks](/x402/overview#networks).
+
+***
+
+### Testnet quickstart
+
+No API key, no real funds. Start here:
+
+1. Get testnet SBC from [testnet.radiustech.xyz/wallet](https://testnet.radiustech.xyz/wallet) (Radius) or [dashboard.stablecoin.xyz/faucet](https://dashboard.stablecoin.xyz/faucet) (Base Sepolia)
+2. Use `network: 'radius-testnet'`, `network: 'base-sepolia'`, or `network: 'solana-devnet'`
+3. Run the examples in [`examples/`](https://github.com/stablecoinxyz/x402-sdk/tree/main/examples)
+

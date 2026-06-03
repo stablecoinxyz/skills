@@ -5,7 +5,7 @@ Skills for building on **Radius Network** with SBC AppKit — gasless transactio
 ## Included
 
 - `skills/`: SBC onchain development skills (see below)
-- `.mcp.json`: MCP server config (extend to add SBC documentation server)
+- `.mcp.json`: MCP server config (optional; skills bundle `sbc-llms.txt` / `sbc-llms-full.txt` from https://docs.stablecoin.xyz/)
 
 ## Skills
 
