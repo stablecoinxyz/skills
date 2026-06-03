@@ -4,10 +4,11 @@ Agent: use with [SKILL.md](SKILL.md) for workflow; this file is constants and ca
 
 ## SBC documentation (bundled with this skill)
 
-| File | Purpose |
-| ---- | ------- |
-| [sbc-llms.txt](sbc-llms.txt) | Doc index (titles + paths) — use to find the right section |
-| [sbc-llms-full.txt](sbc-llms-full.txt) | Full SBC docs text — search for Radius, AppKit, AA, paymaster |
+| File | In skill folder | After install in user’s app |
+| ---- | --------------- | ----------------------------- |
+| [sbc-llms.txt](sbc-llms.txt) | `sbc-llms.txt` | `.cursor/skills/sbc-radius-integration/sbc-llms.txt` |
+| [sbc-llms-full.txt](sbc-llms-full.txt) | `sbc-llms-full.txt` | `.cursor/skills/sbc-radius-integration/sbc-llms-full.txt` |
+| [reference.md](reference.md) | `reference.md` | `.cursor/skills/sbc-radius-integration/reference.md` |
 
 Live mirrors (if local files missing): https://docs.stablecoin.xyz/llms.txt and https://docs.stablecoin.xyz/llms-full.txt
 

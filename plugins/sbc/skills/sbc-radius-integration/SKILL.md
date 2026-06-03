@@ -37,10 +37,21 @@ Do **not** reply with a tutorial. Do **not** tell the user to run `npm install`,
 
 ## SBC documentation (read before guessing)
 
-1. **Stable facts:** [reference.md](reference.md) in this skill folder.
-2. **Full docs:** Read/search [sbc-llms-full.txt](sbc-llms-full.txt) (bundled). If missing, fetch https://docs.stablecoin.xyz/llms-full.txt — do not load the entire file into context at once; search for relevant sections (Radius, AppKit, `useSbcPara`, account abstraction, paymaster, bundler, env vars).
-3. **Index:** [sbc-llms.txt](sbc-llms.txt) or https://docs.stablecoin.xyz/llms.txt for page titles and paths.
-4. **Published site:** https://docs.stablecoin.xyz/ when you need the latest page or local bundles are stale.
+**Paths after `npx skills add` in the user’s app (read these files with the Read tool — do not guess):**
+
+| What | Path from project root |
+| ---- | ---------------------- |
+| Full SBC docs | `.cursor/skills/sbc-radius-integration/sbc-llms-full.txt` |
+| Doc index | `.cursor/skills/sbc-radius-integration/sbc-llms.txt` |
+| Stable Radius constants | `.cursor/skills/sbc-radius-integration/reference.md` |
+| This workflow | `.cursor/skills/sbc-radius-integration/SKILL.md` |
+
+Same filenames exist **relative to this skill folder** when the agent runs from the skills repo: `sbc-llms-full.txt`, `sbc-llms.txt`, `reference.md`.
+
+1. **Stable facts:** [reference.md](reference.md).
+2. **Full docs:** Read/search `sbc-llms-full.txt` at the path above. If missing, fetch https://docs.stablecoin.xyz/llms-full.txt — do not load the entire file at once; search sections (Radius, AppKit, `useSbcPara`, account abstraction, paymaster, bundler, env vars).
+3. **Index:** `sbc-llms.txt` or https://docs.stablecoin.xyz/llms.txt.
+4. **Published site:** https://docs.stablecoin.xyz/ when local bundles are stale.
 
 For Radius integration, search `sbc-llms-full.txt` for at least: `Radius`, `useSbcPara`, `AppKit`, `account abstraction`, `paymaster`, `radiusTestnet`.
 
