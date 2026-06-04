@@ -2,7 +2,19 @@
 
 Agent: use with [SKILL.md](SKILL.md) for workflow; this file is constants and caveats.
 
-Source: [Radius overview](https://docs.stablecoin.xyz/radius/overview), [configuration](https://docs.stablecoin.xyz/radius/configuration).
+## SBC documentation (bundled with this skill)
+
+| File | In skill folder | After install in user’s app |
+| ---- | --------------- | ----------------------------- |
+| [sbc-llms.txt](sbc-llms.txt) | `sbc-llms.txt` | `.cursor/skills/sbc-radius-integration/sbc-llms.txt` |
+| [sbc-llms-full.txt](sbc-llms-full.txt) | `sbc-llms-full.txt` | `.cursor/skills/sbc-radius-integration/sbc-llms-full.txt` |
+| [reference.md](reference.md) | `reference.md` | `.cursor/skills/sbc-radius-integration/reference.md` |
+
+Live mirrors (if local files missing): https://docs.stablecoin.xyz/llms.txt and https://docs.stablecoin.xyz/llms-full.txt
+
+Source repo (human editors): https://github.com/stablecoinxyz/sbc-docs
+
+Radius pages: [overview](https://docs.stablecoin.xyz/radius/overview), [configuration](https://docs.stablecoin.xyz/radius/configuration).
 
 ## Para wallet (default)
 

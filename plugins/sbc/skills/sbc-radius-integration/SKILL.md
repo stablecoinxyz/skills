@@ -27,11 +27,33 @@ Do **not** reply with a tutorial. Do **not** tell the user to run `npm install`,
 
 **Canonical references (read if unsure):**
 
-| Repo | What to copy |
-| ---- | ------------ |
-| `dollar-wallet-web` | `src/components/Providers.tsx`, `src/lib/para/hooks.ts`, `src/lib/sbc/hooks.ts` (`useSbcPara`) |
-| `agent-payments` | `apps/web/package.json` Para SDK versions (`@getpara/react-sdk@2.27.0`) |
-| SBC docs | https://docs.stablecoin.xyz/radius/overview |
+| Source | What to use |
+| ------ | ----------- |
+| [reference.md](reference.md) | Stable Radius constants (chain IDs, EntryPoint, env vars) |
+| [sbc-llms-full.txt](sbc-llms-full.txt) | Full SBC docs — search before guessing API/SDK behavior |
+| [sbc-llms.txt](sbc-llms.txt) | Doc index with page paths |
+| `dollar-wallet-web` | `Providers.tsx`, `lib/para/hooks.ts`, `lib/sbc/hooks.ts` (`useSbcPara`) |
+| `agent-payments` | Para SDK versions (`@getpara/react-sdk@2.27.0`) |
+
+## SBC documentation (read before guessing)
+
+**Paths after `npx skills add` in the user’s app (read these files with the Read tool — do not guess):**
+
+| What | Path from project root |
+| ---- | ---------------------- |
+| Full SBC docs | `.cursor/skills/sbc-radius-integration/sbc-llms-full.txt` |
+| Doc index | `.cursor/skills/sbc-radius-integration/sbc-llms.txt` |
+| Stable Radius constants | `.cursor/skills/sbc-radius-integration/reference.md` |
+| This workflow | `.cursor/skills/sbc-radius-integration/SKILL.md` |
+
+Same filenames exist **relative to this skill folder** when the agent runs from the skills repo: `sbc-llms-full.txt`, `sbc-llms.txt`, `reference.md`.
+
+1. **Stable facts:** [reference.md](reference.md).
+2. **Full docs:** Read/search `sbc-llms-full.txt` at the path above. If missing, fetch https://docs.stablecoin.xyz/llms-full.txt — do not load the entire file at once; search sections (Radius, AppKit, `useSbcPara`, account abstraction, paymaster, bundler, env vars).
+3. **Index:** `sbc-llms.txt` or https://docs.stablecoin.xyz/llms.txt.
+4. **Published site:** https://docs.stablecoin.xyz/ when local bundles are stale.
+
+For Radius integration, search `sbc-llms-full.txt` for at least: `Radius`, `useSbcPara`, `AppKit`, `account abstraction`, `paymaster`, `radiusTestnet`.
 
 ## Agent mandate (run in order)
 
@@ -70,8 +92,8 @@ Do **not** ask the user to copy files or run `npm install` themselves.
 
 ### Steps 1–4 — Implement
 
-1. **Recon** — `package.json`, app entry, existing Para/SBC setup.
-2. **Default path** — Para + `useSbcPara` + **radiusTestnet** (see [reference.md](reference.md)).
+1. **Recon** — `package.json`, app entry, existing Para/SBC setup; skim [sbc-llms.txt](sbc-llms.txt) for relevant doc paths.
+2. **Default path** — Para + `useSbcPara` + **radiusTestnet** (see [reference.md](reference.md); search [sbc-llms-full.txt](sbc-llms-full.txt) for SDK details).
 3. **Execute** — copy/adapt [templates/](templates/), wire providers and connect UI following the app’s existing layout and routing (do not assume a particular route or repo name).
 4. **Verify** — `npx tsc --noEmit` or `npm run build`; fix `"use client"` / `dynamic` issues.
 
@@ -269,12 +291,12 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 | [env.example.snippet](templates/env.example.snippet) | Env vars |
 | [direct-aa-url.ts](templates/direct-aa-url.ts) | Non-Para AA URL |
 
-## Docs
+## Bundled docs files
 
-- https://docs.stablecoin.xyz/radius/getting-started
-- https://docs.stablecoin.xyz/radius/configuration
-- https://docs.stablecoin.xyz/account-abstraction/getting-started
-- Blog: `create-sbc-app --template react-para`
+| File | Refresh |
+| ---- | ------- |
+| [sbc-llms.txt](sbc-llms.txt) | `curl -sS https://docs.stablecoin.xyz/llms.txt -o sbc-llms.txt` |
+| [sbc-llms-full.txt](sbc-llms-full.txt) | `./scripts/sync-sbc-llms.sh` or `curl -sS https://docs.stablecoin.xyz/llms-full.txt -o sbc-llms-full.txt` |
 
 ## Rules
 
@@ -292,6 +314,7 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 
 - ALWAYS start the dev server on port 3003: `npm run dev -- -p 3003`. Para's SDK only accepts `localhost:3003` as a whitelisted origin for local development — any other port will break the wallet modal.
 - ALWAYS read the correct template files before implementing — do not reconstruct from memory.
+- ALWAYS search [sbc-llms-full.txt](sbc-llms-full.txt) (or fetch https://docs.stablecoin.xyz/llms-full.txt) for SDK/API details — do not rely on training data alone.
 - ALWAYS use `getRadiusChain()` / `getRadiusRpcUrl()` from `radius.ts`; never hardcode chain ID or RPC URL.
 - ALWAYS use the custom Radius EntryPoint (`0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`) — not the canonical Base v0.7 EntryPoint.
 - ALWAYS set `maxPriorityFeePerGas === maxFeePerGas` in UserOperations (Radius does not support EIP-1559); AppKit 1.6.1+ handles this automatically.
@@ -305,8 +328,11 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 
 ## Reference Links
 
-- [SBC Radius Docs](https://docs.stablecoin.xyz/radius/overview)
-- [SBC Radius Configuration](https://docs.stablecoin.xyz/radius/configuration)
+- [SBC docs (site)](https://docs.stablecoin.xyz/)
+- [SBC llms.txt](https://docs.stablecoin.xyz/llms.txt) · [llms-full.txt](https://docs.stablecoin.xyz/llms-full.txt)
+- [sbc-docs source](https://github.com/stablecoinxyz/sbc-docs)
+- [SBC Radius overview](https://docs.stablecoin.xyz/radius/overview)
+- [SBC Radius configuration](https://docs.stablecoin.xyz/radius/configuration)
 - [SBC Account Abstraction](https://docs.stablecoin.xyz/account-abstraction/getting-started)
 - [Para Wallet Docs](https://developer.getpara.com)
 - [Radius Testnet Faucet](https://testnet.radiustech.xyz/wallet)

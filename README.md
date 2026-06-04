@@ -15,10 +15,15 @@ Ship stablecoin apps faster with SBC [Skills](https://agentskills.io): best-prac
 /plugin install sbc-skills@sbc
 ```
 
-### Vercel Skills CLI
+### Cursor / Vercel Skills CLI
+
+Run inside **your app repo** (not this `skills` repo). Select **Cursor** and **Project** when prompted.
+
 ```bash
 npx skills add stablecoin/skills
 ```
+
+**Quick check:** open your app in Cursor, then ask `@sbc-radius-integration` for the Radius testnet chain ID per SBC docs — expect **72344** and **`radiusTestnet`** from `.cursor/skills/sbc-radius-integration/sbc-llms-full.txt`.
 
 ## Skills
 

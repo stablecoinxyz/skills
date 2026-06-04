@@ -2,10 +2,20 @@
 
 Skills for building on **Radius Network** with SBC AppKit — gasless transactions, Para wallet connection, and account abstraction.
 
+## Install in an app
+
+```bash
+cd your-app
+npx skills add stablecoin/skills   # Cursor + Project
+```
+
+Prefer this over symlinking into `.cursor/skills/` so bundled `sbc-llms-full.txt` is copied into the project.
+
 ## Included
 
 - `skills/`: SBC onchain development skills (see below)
-- `.mcp.json`: MCP server config (extend to add SBC documentation server)
+- Bundled docs per skill: `sbc-llms.txt`, `sbc-llms-full.txt` (from https://docs.stablecoin.xyz/)
+- `.mcp.json`: MCP server config (optional extension)
 
 ## Skills
 
