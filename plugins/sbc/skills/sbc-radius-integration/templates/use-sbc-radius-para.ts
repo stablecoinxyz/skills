@@ -2,15 +2,13 @@
 
 /**
  * SBC AppKit + Para on Radius — copy to src/lib/sbc/use-sbc-radius-para.ts
- * Pattern: dollar-wallet-web/src/lib/sbc/hooks.ts (useSbcPara + signature normalization)
  *
  * Key fixes vs. a naive useSbcPara wrapper:
- *  1. normalizeSignatureToRSV — Para returns base64 / non-standard hex; SBC AppKit
- *     needs standard RSV hex for EIP-1271 / UserOp signing.
- *  2. wrappedWalletClient — overrides signMessage on the embedded wallet client so
- *     every signature goes through the normalizer.
- *  3. paraViemClients is always an object (never null) so useSbcPara initializes
- *     immediately on connection instead of waiting for a second render.
+ *  1. normalizeSignatureToRSV — Para returns base64 / non-standard hex.
+ *  2. toSbcWalletClient — omit `request` so permissionless toOwner() does not call eth_accounts.
+ *  3. signViaParaViem — UserOp signing uses native paraWalletClient.signMessage (not
+ *     signMessageAsync / EIP-191), which avoids AA24 signature errors.
+ *  4. paraViemClients is always an object (never null) so useSbcPara initializes on first connect.
  */
 import { useRef, useMemo, useCallback } from "react";
 import { useAccount, useWallet, useSignMessage } from "@getpara/react-sdk";
@@ -24,7 +22,41 @@ function getSbcApiKey(): string {
   return process.env.NEXT_PUBLIC_SBC_API_KEY ?? process.env.VITE_SBC_API_KEY ?? "";
 }
 
-// Normalize Para signature (base64 or non-standard hex) → 65-byte RSV hex string.
+function assembleSignature(r: `0x${string}`, s: `0x${string}`, v: number): `0x${string}` {
+  const vHex = v.toString(16).padStart(2, "0");
+  return (r + s.slice(2) + vHex) as `0x${string}`;
+}
+
+/**
+ * Wallet client for SBC AppKit — spreads Para viem client but drops `request` so
+ * permissionless `toOwner()` does not call `eth_accounts`. UserOp signing uses
+ * native `signMessage` + RSV normalization (not signMessageAsync / EIP-191).
+ */
+function toSbcWalletClient(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  base: any,
+  account: { address: `0x${string}`; signMessage: (args: unknown) => Promise<`0x${string}`> },
+  chain: ReturnType<typeof getRadiusChain>,
+) {
+  const { request: _request, ...baseWithoutRequest } = base;
+  void _request;
+
+  return {
+    ...baseWithoutRequest,
+    account,
+    chain: base.chain ?? chain,
+    signMessage: (args: unknown) => account.signMessage(args),
+    signTypedData:
+      typeof base.signTypedData === "function"
+        ? base.signTypedData.bind(base)
+        : undefined,
+    signTransaction:
+      typeof base.signTransaction === "function"
+        ? base.signTransaction.bind(base)
+        : undefined,
+  };
+}
+
 function normalizeSignatureToRSV(sig: string): {
   r: `0x${string}`;
   s: `0x${string}`;
@@ -121,7 +153,9 @@ export function useSbcRadiusPara() {
   const accountAddressRef = useRef(paraAccount_viem?.address);
   accountAddressRef.current = paraAccount_viem?.address;
 
-  // Sign via Para's native API and normalize the result to standard RSV hex.
+  const chain = getRadiusChain();
+  const rpcUrl = getRadiusRpcUrl();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stableSignMessage = useCallback(async (message: any): Promise<`0x${string}`> => {
     const walletId = walletIdRef.current;
@@ -182,7 +216,6 @@ export function useSbcRadiusPara() {
       v = v === 27 ? 28 : 27;
     }
 
-    // For raw 32-byte hashes, try to recover the correct v value.
     if (isRawHash && accountAddressRef.current) {
       const expected = accountAddressRef.current.toLowerCase();
       const eip191Hash = hashMessage({ raw: hashHex as `0x${string}` });
@@ -211,39 +244,62 @@ export function useSbcRadiusPara() {
     return (r + s.slice(2) + vHex) as `0x${string}`;
   }, []);
 
-  // Override signMessage on the embedded wallet client so every Para sig is
-  // normalized before reaching SBC AppKit / EIP-1271 verifiers.
+  const signViaParaViem = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (args: any): Promise<`0x${string}`> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const base = paraWalletClient as any;
+      if (typeof base?.signMessage !== "function") {
+        return stableSignMessage(args?.message ?? args);
+      }
+
+      const message = args?.message ?? args;
+      const sig = (await base.signMessage({ message })) as `0x${string}`;
+
+      try {
+        const { r, s, v } = normalizeSignatureToRSV(sig);
+        let vNorm = v;
+        if (vNorm < 27) vNorm += 27;
+        return assembleSignature(r, s, vNorm);
+      } catch {
+        return sig;
+      }
+    },
+    [paraWalletClient, stableSignMessage],
+  );
+
   const wrappedWalletClient = useMemo(() => {
     if (!paraWalletClient || !paraAccount_viem || !wallet?.id) return null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const base = paraWalletClient as any;
     const account = {
       ...paraAccount_viem,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      signMessage: ({ message }: any) => stableSignMessage(message),
+      signMessage: signViaParaViem,
     };
-    return {
-      ...base,
-      account,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      signMessage: (args: any) => account.signMessage(args),
-    };
-  }, [paraWalletClient, paraAccount_viem, wallet?.id, stableSignMessage]);
+    return toSbcWalletClient(base, account, chain);
+  }, [paraWalletClient, paraAccount_viem, wallet?.id, signViaParaViem, chain]);
 
-  const chain = getRadiusChain();
-  const rpcUrl = getRadiusRpcUrl();
+  const externalWalletClientForSbc = useMemo(() => {
+    if (!isExternal || !paraWalletClient?.account) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const base = paraWalletClient as any;
+    return toSbcWalletClient(base, base.account, chain);
+  }, [isExternal, paraWalletClient, chain]);
 
-  // Always pass an object (never null) so useSbcPara initializes on first render
-  // after connection rather than waiting for a second render cycle.
   const paraViemClients = useMemo(
     () => ({
       publicClient: paraPublicClient,
-      walletClient: isExternal
-        ? paraWalletClient
-        : wrappedWalletClient ?? paraWalletClient,
+      walletClient: isExternal ? externalWalletClientForSbc : wrappedWalletClient,
       account: isExternal ? paraWalletClient?.account : paraAccount_viem,
     }),
-    [isExternal, paraPublicClient, wrappedWalletClient, paraWalletClient, paraAccount_viem],
+    [
+      isExternal,
+      paraPublicClient,
+      wrappedWalletClient,
+      externalWalletClientForSbc,
+      paraWalletClient,
+      paraAccount_viem,
+    ],
   );
 
   const {

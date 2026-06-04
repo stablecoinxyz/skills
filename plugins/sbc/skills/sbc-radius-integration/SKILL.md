@@ -126,11 +126,19 @@ Also: `import "@getpara/react-sdk/styles.css"` in the client provider file.
 `wagmi` is required for the external wallet path (`useWagmiWalletClient` in `use-para-viem-radius.ts`).  
 **Next.js:** must install `@turnkey/viem` and `@turnkey/http` or build fails resolving dynamic imports.
 
-### A2. Chain config
+### A2. Chain config + RPC proxy
 
 Copy [templates/radius-chain.ts](templates/radius-chain.ts) → `src/config/radius.ts`.
 
-Export `getRadiusChain()` and `getRadiusRpcUrl()` (default testnet).
+**Next.js only:**
+
+1. Copy [templates/radius-rpc-proxy.ts](templates/radius-rpc-proxy.ts) → `src/lib/radius-rpc-proxy.ts`
+2. Copy [templates/api/radius-rpc/route.ts](templates/api/radius-rpc/route.ts) → `src/app/api/radius-rpc/route.ts`
+3. Optional: copy [templates/api/radius-rpc/health/route.ts](templates/api/radius-rpc/health/route.ts) → `src/app/api/radius-rpc/health/route.ts` (setup banner / diagnostics)
+
+Production default: client transport uses `/api/radius-rpc`; the proxy reads `RADIUS_RPC_API_KEY` server-side so the key stays out of the browser bundle.
+
+**Local dev:** Cloudflare may block server egress even with a valid key (403). Then set `NEXT_PUBLIC_RADIUS_RPC_URL` to the full authenticated URL (`https://rpc.testnet.radiustech.xyz/YOUR_KEY`). `getRadiusRpcUrl()` prefers that env var and must not branch on `window` (SSR/hydration stability).
 
 ### A3. Para config
 
@@ -170,8 +178,11 @@ Append [templates/env.example.snippet](templates/env.example.snippet) to `.env.e
 NEXT_PUBLIC_SBC_API_KEY=
 NEXT_PUBLIC_PARA_API_KEY=
 NEXT_PUBLIC_SBC_CHAIN=radiusTestnet
+RADIUS_RPC_API_KEY=        # server-side only — no NEXT_PUBLIC_ prefix
+# NEXT_PUBLIC_RADIUS_RPC_URL=https://rpc.testnet.radiustech.xyz/YOUR_KEY  # local dev if proxy 403
 ```
 
+`RADIUS_RPC_API_KEY` is required for the Next.js proxy. Add `NEXT_PUBLIC_RADIUS_RPC_URL` only when `/api/radius-rpc` returns Cloudflare 403 from the server (dev workaround; key in bundle).  
 Vite: `VITE_SBC_API_KEY`, `VITE_PARA_API_KEY`, `VITE_SBC_CHAIN`.
 
 Create `.env.local` placeholders if missing; never commit real keys.
@@ -227,7 +238,9 @@ User sets SBC + Para keys in generated `.env`.
 - [ ] para-config.ts exports EXTERNAL_WALLETS, WALLETCONNECT_PROJECT_ID, authLayout EXTERNAL:FULL
 - [ ] ParaProviders: externalWalletConfig wired + @getpara/react-sdk/styles.css
 - [ ] use-para-viem-radius: walletClient.chain fallback + external wallet path (wagmi) + usePara export
-- [ ] use-sbc-radius-para: normalizeSignatureToRSV + wrappedWalletClient + paraViemClients always object
+- [ ] radius-rpc-proxy.ts + /api/radius-rpc (+ optional /api/radius-rpc/health)
+- [ ] getRadiusRpcUrl: stable SSR (no window); optional NEXT_PUBLIC_RADIUS_RPC_URL fallback
+- [ ] use-sbc-radius-para: toSbcWalletClient (omit request) + signViaParaViem + normalizeSignatureToRSV + paraViemClients always object
 - [ ] Connect UI (useModal + smart account display)
 - [ ] .env.example with SBC + Para keys (+ optional WALLETCONNECT_PROJECT_ID)
 - [ ] No canonical Base EntryPoint on Radius paths
@@ -243,7 +256,10 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 
 | File | Purpose |
 | ---- | ------- |
-| [radius-chain.ts](templates/radius-chain.ts) | viem Radius chains |
+| [radius-chain.ts](templates/radius-chain.ts) | viem Radius chains + getRadiusRpcUrl |
+| [radius-rpc-proxy.ts](templates/radius-rpc-proxy.ts) | Shared server RPC proxy helpers |
+| [api/radius-rpc/route.ts](templates/api/radius-rpc/route.ts) | Next.js RPC proxy |
+| [api/radius-rpc/health/route.ts](templates/api/radius-rpc/health/route.ts) | Optional RPC health check |
 | [para-config.ts](templates/para-config.ts) | Para SDK config |
 | [use-para-viem-radius.ts](templates/use-para-viem-radius.ts) | Para → viem clients on Radius |
 | [use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) | `useSbcPara` wrapper |
@@ -281,7 +297,10 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 - ALWAYS set `maxPriorityFeePerGas === maxFeePerGas` in UserOperations (Radius does not support EIP-1559); AppKit 1.6.1+ handles this automatically.
 - ALWAYS use `usePara()` (not `useParaViemRadius()` directly) in `use-sbc-radius-para.ts` — it handles both embedded and external wallet paths.
 - ALWAYS pass `paraViemClients` as an object to `useSbcPara` — never `null`; passing null causes AppKit to skip initialization on first render.
-- ALWAYS include the `wrappedWalletClient` with `normalizeSignatureToRSV` for the embedded Para wallet path — Para returns base64-encoded signatures that fail EIP-1271 without normalization.
+- ALWAYS use `toSbcWalletClient` (omit `request` from the Para viem client) so `toOwner()` does not call `eth_accounts` ("address is required").
+- ALWAYS route UserOp signing through `signViaParaViem` (native `paraWalletClient.signMessage` + RSV normalize), not `signMessageAsync` alone — otherwise bundler rejects with AA24 signature error.
+- ALWAYS include `normalizeSignatureToRSV` for Para signatures (base64 / non-standard hex) before EIP-1271 verification.
+- If `/api/radius-rpc` returns 403 from the server, set `NEXT_PUBLIC_RADIUS_RPC_URL` for local dev and restart on port 3003.
 - ALWAYS add `walletClient.chain` fallback after `createParaViemClient()` — the property may be undefined and `useSbcPara` reads it during bundler URL construction.
 
 ## Reference Links

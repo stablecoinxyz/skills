@@ -203,6 +203,18 @@ await sendUserOperation({
 })
 ```
 
+## Troubleshooting (Para + useSbcPara)
+
+| Symptom | Likely cause | Fix |
+| -------- | ------------- | --- |
+| `/api/radius-rpc` 403, setup banner | Cloudflare blocks server egress | `NEXT_PUBLIC_RADIUS_RPC_URL=https://rpc.testnet.radiustech.xyz/YOUR_KEY` in `.env.local`, restart `npm run dev -- -p 3003` |
+| `address is required` on connect | `toOwner()` called `eth_accounts` via Para `request` | `toSbcWalletClient` — spread Para client but omit `request` |
+| AA24 / signature validation failed | UserOp signed via EIP-191 `signMessageAsync` | `signViaParaViem` — `paraWalletClient.signMessage` + RSV normalization |
+| Hydration warning on `<html>` | Browser extension attributes | `suppressHydrationWarning` on `<html>` / `<body>` in root layout (not Radius-specific) |
+| Para modal blocked | Wrong dev port | `npm run dev -- -p 3003` only |
+
+**AgentPayments** uses server-side Para pregen EOAs and MPP — not `useSbcPara` / gasless UserOps. Do not copy that stack for browser smart-account flows.
+
 ## External links
 
 - Radius docs: https://docs.radiustech.xyz
