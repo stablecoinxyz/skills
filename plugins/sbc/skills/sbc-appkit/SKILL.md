@@ -90,6 +90,10 @@ Tell the user: run `npm run dev -- -p 3003` and connect with Para to test a gasl
 | ---- | ------- |
 | [use-para-viem-radius.ts](templates/use-para-viem-radius.ts) | `src/lib/para/hooks.ts` |
 | [use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) | `src/lib/sbc/use-sbc-radius-para.ts` |
+| [AppKitDemo.tsx](templates/AppKitDemo.tsx) | `src/components/AppKitDemo.tsx` |
+| [AppKitDemoLoader.tsx](templates/AppKitDemoLoader.tsx) | `src/components/AppKitDemoLoader.tsx` |
+
+After copying the templates, wire `AppKitDemoLoader` into a route that matches the app's existing layout and design. Do not hardcode a route name — follow the app's conventions.
 
 ## Reference links
 

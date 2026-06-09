@@ -75,6 +75,10 @@ Tell the user:
 | [para-config.ts](templates/para-config.ts) | `src/lib/para/config.ts` |
 | [ParaProviders-next.tsx](templates/ParaProviders-next.tsx) | `src/components/providers/ParaProviders.tsx` |
 | [RadiusParaConnectLoader.tsx](templates/RadiusParaConnectLoader.tsx) | `src/components/ParaConnectLoader.tsx` |
+| [ParaWalletDemo.tsx](templates/ParaWalletDemo.tsx) | `src/components/ParaWalletDemo.tsx` |
+| [ParaWalletDemoLoader.tsx](templates/ParaWalletDemoLoader.tsx) | `src/components/ParaWalletDemoLoader.tsx` |
+
+After copying the templates, wire `ParaWalletDemoLoader` into a route that matches the app's existing layout and design. Do not hardcode a route name — follow the app's conventions.
 
 ## Reference links
 
