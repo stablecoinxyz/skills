@@ -39,6 +39,7 @@ export default function RadiusParaConnect() {
 
   const {
     account,
+    ownerAddress,
     sbcAppKit,
     isInitialized,
     error,
@@ -127,6 +128,11 @@ export default function RadiusParaConnect() {
           {/* Account info */}
           {account?.address && (
             <div className="space-y-1">
+              {ownerAddress && (
+                <p className="break-all text-xs opacity-60">
+                  address: {ownerAddress}
+                </p>
+              )}
               <p className="break-all text-xs opacity-80">
                 smart account: {account.address}
               </p>
