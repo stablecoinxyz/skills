@@ -16,6 +16,15 @@ Source repo (human editors): https://github.com/stablecoinxyz/sbc-docs
 
 Radius pages: [overview](https://docs.stablecoin.xyz/radius/overview), [configuration](https://docs.stablecoin.xyz/radius/configuration).
 
+## SBC token (ERC-20)
+
+| Network | Token address | Decimals |
+| ------- | ------------- | -------- |
+| Radius testnet | `0x33ad9e4BD16B69B5BFdED37D8B5D9fF9aba014Fb` | 6 |
+| Radius mainnet | `0x33ad9e4BD16B69B5BFdED37D8B5D9fF9aba014Fb` | 6 |
+
+Use `erc20Abi` + `encodeFunctionData` to build the `transfer` calldata; pass `value: "0"` to `sendUserOperation`. Balance via `publicClient.readContract` → `balanceOf`. Format with `formatUnits(raw, 6)`.
+
 ## Para wallet (default)
 
 | Key | Env var | Where |

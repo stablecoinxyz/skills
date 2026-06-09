@@ -332,6 +332,7 @@ export function useSbcRadiusPara() {
     ownerAddress,
     disconnectWallet,
     chain,
+    publicClient: paraViemClients.publicClient,
     isParaConnected: paraAccount.isConnected,
     signRawHash: stableSignMessage,
   };
