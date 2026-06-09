@@ -19,18 +19,34 @@ Prefer this over symlinking into `.cursor/skills/` so bundled `sbc-llms-full.txt
 
 ## Skills
 
+| Skill | Use when | Keys needed |
+| ----- | -------- | ----------- |
+| [`sbc-radius-integration`](skills/sbc-radius-integration/SKILL.md) | Full Radius + Para + AppKit in one shot | SBC + Para |
+| [`sbc-para-wallet`](skills/sbc-para-wallet/SKILL.md) | Para wallet only (any chain) | Para |
+| [`sbc-appkit`](skills/sbc-appkit/SKILL.md) | SBC AppKit / gasless sends (any chain) | SBC |
+
 ### sbc-radius-integration
-Fully integrate Radius testnet or mainnet into any Next.js or Vite app. Covers package install, chain config, ParaProvider setup, Para wallet connection (embedded + external wallets), signature normalization, and gasless RUSD user operations via SBC AppKit.
+Full end-to-end Radius integration: chain config, ParaProvider, Para wallet (embedded + external), signature normalization, gasless SBC ERC-20 transfers via AppKit.
 
-**User provides (after agent implements):**
-1. `NEXT_PUBLIC_SBC_API_KEY` — [dashboard.stablecoin.xyz](https://dashboard.stablecoin.xyz/)
-2. `NEXT_PUBLIC_PARA_API_KEY` — [developer.getpara.com](https://developer.getpara.com/)
-
-**Example prompt:**
 ```text
 @sbc-radius-integration
-
 Integrate Radius testnet for me
 ```
 
-**Docs:** https://docs.stablecoin.xyz/radius/overview
+### sbc-para-wallet
+Para wallet setup only — providers, connect modal, embedded + external wallets. Use on any chain.
+
+```text
+@sbc-para-wallet
+Add Para wallet to my app
+```
+
+### sbc-appkit
+SBC AppKit wiring — `useSbcPara`, `sendUserOperation`, SBC balance. Use on any chain. Requires Para already set up.
+
+```text
+@sbc-appkit
+Add gasless SBC transfers to my app
+```
+
+**Docs:** https://docs.stablecoin.xyz

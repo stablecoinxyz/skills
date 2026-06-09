@@ -25,6 +25,13 @@ Do **not** reply with a tutorial. Do **not** tell the user to run `npm install`,
 
 **Default wallet:** **Para** via `@getpara/react-sdk` + `useSbcPara` from `@stablecoin.xyz/react` (same pattern as `dollar-wallet-web`, Para versions aligned with `agent-payments`).
 
+**Related sub-skills (use independently when Radius is not needed):**
+
+| Skill | Use when |
+| ----- | -------- |
+| `@sbc-para-wallet` | Only need Para wallet setup (any chain) |
+| `@sbc-appkit` | Only need SBC AppKit / gasless sends (any chain) |
+
 **Canonical references (read if unsure):**
 
 | Source | What to use |

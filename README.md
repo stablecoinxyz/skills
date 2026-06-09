@@ -29,7 +29,9 @@ npx skills add stablecoin/skills
 
 | Skill | Description |
 |-------|-------------|
-| [`sbc-radius-integration`](./plugins/sbc/skills/sbc-radius-integration/SKILL.md) | Fully integrates Radius Network into your app using SBC AppKit, Para wallet, and account abstraction. Covers install, chain config, providers, env vars, Para wallet connection, and gasless RUSD transactions. |
+| [`sbc-radius-integration`](./plugins/sbc/skills/sbc-radius-integration/SKILL.md) | Full Radius + Para + AppKit integration in one shot. Chain config, ParaProvider, embedded + external wallets, gasless SBC transfers. |
+| [`sbc-para-wallet`](./plugins/sbc/skills/sbc-para-wallet/SKILL.md) | Para wallet setup only (any chain). Providers, connect modal, embedded + external wallet support. |
+| [`sbc-appkit`](./plugins/sbc/skills/sbc-appkit/SKILL.md) | SBC AppKit wiring only (any chain). `useSbcPara`, `sendUserOperation`, SBC balance. Requires Para already set up. |
 
 ## How Skills Work
 Skills provide context that help agents do specific things with greater accuracy:
