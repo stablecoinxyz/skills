@@ -116,6 +116,17 @@ Currency Symbol: RUSD
 
 Faucet: https://testnet.radiustech.xyz/wallet
 
+## Block explorer (Radius Dashboard)
+
+| Network | Explorer |
+| ------- | -------- |
+| Testnet | https://testnet.radiustech.xyz |
+| Mainnet | https://network.radiustech.xyz |
+
+URL patterns: `/tx/{transactionHash}`, `/address/{address}`.
+
+**Gasless UserOp txs:** the outer transaction shows **bundler → EntryPoint** (`0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`), not the user's EOA/smart account. The SBC ERC-20 transfer is inside the UserOp — view it on the tx page under **token transfers** or on the **smart account** address page. `RadiusParaConnect` links both after send.
+
 ## EntryPoint (critical)
 
 ```typescript
