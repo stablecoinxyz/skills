@@ -199,6 +199,8 @@ Copy [templates/RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) → e.g.
 
 Uses `useModal` from Para for **Connect** / **Disconnect** and `useSbcRadiusPara` for smart account + test send.
 
+After a successful `sendUserOperation`, capture `result.transactionHash` and show it in the UI with a link to the Radius block explorer (`chain.blockExplorers.default.url` + `/tx/{hash}`). Also link the smart account and SBC token contract (`/address/{address}`). See [reference.md](reference.md) — outer tx `from`/`to` is bundler → EntryPoint; the user's transfer appears under token transfers / smart account history.
+
 ### A8. Environment
 
 Append [templates/env.example.snippet](templates/env.example.snippet) to `.env.example`.
@@ -270,7 +272,7 @@ User sets SBC + Para keys in generated `.env`.
 - [ ] radius-rpc-proxy.ts + /api/radius-rpc (+ optional /api/radius-rpc/health)
 - [ ] getRadiusRpcUrl: stable SSR (no window); optional NEXT_PUBLIC_RADIUS_RPC_URL fallback
 - [ ] use-sbc-radius-para: toSbcWalletClient (omit request) + signViaParaViem + normalizeSignatureToRSV + paraViemClients always object
-- [ ] Connect UI (useModal + smart account display)
+- [ ] Connect UI (useModal + smart account display + tx hash + Radius explorer links)
 - [ ] .env.example with SBC + Para keys (+ optional WALLETCONNECT_PROJECT_ID)
 - [ ] No canonical Base EntryPoint on Radius paths
 - [ ] build/tsc passes
@@ -293,7 +295,7 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 | [use-para-viem-radius.ts](templates/use-para-viem-radius.ts) | Para → viem clients on Radius |
 | [use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) | `useSbcPara` wrapper |
 | [ParaProviders-next.tsx](templates/ParaProviders-next.tsx) | QueryClient + ParaProvider |
-| [RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) | Connect + test send |
+| [RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) | Connect + test send + tx hash + explorer links |
 | [RadiusParaConnectLoader.tsx](templates/RadiusParaConnectLoader.tsx) | Next.js dynamic loader |
 | [env.example.snippet](templates/env.example.snippet) | Env vars |
 | [direct-aa-url.ts](templates/direct-aa-url.ts) | Non-Para AA URL |
