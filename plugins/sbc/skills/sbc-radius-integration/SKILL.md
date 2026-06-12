@@ -280,6 +280,7 @@ User sets SBC + Para keys in generated `.env`.
 - [ ] .env.example with SBC + Para keys (+ optional WALLETCONNECT_PROJECT_ID)
 - [ ] No canonical Base EntryPoint on Radius paths
 - [ ] Mainnet only: @stablecoin.xyz+core patch in patches/ + patch-package postinstall (chain ID 723487)
+- [ ] Env flip safe: getRadiusChain throws if mainnet selected on unpatched core; rpc URL overrides validated via radiusUrlMatchesSelectedChain
 - [ ] build/tsc passes
 - [ ] User told: run on PORT 3003 (npm run dev -- -p 3003) + two API keys + Para connect + faucet
 ```
