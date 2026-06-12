@@ -159,6 +159,8 @@ Also: `import "@getpara/react-sdk/styles.css"` in the client provider file.
 
 Copy [templates/radius-chain.ts](templates/radius-chain.ts) → `src/config/radius.ts`.
 
+The template imports `radius` and `radiusTestnet` from `@stablecoin.xyz/core` (not custom `defineChain`). AppKit matches chains by `chain.id` in `CHAIN_CONFIGS` — a hand-rolled chain named `Radius Network` fails with `Unsupported chain` on mainnet even when the id is correct.
+
 **Next.js only:**
 
 1. Copy [templates/radius-rpc-proxy.ts](templates/radius-rpc-proxy.ts) → `src/lib/radius-rpc-proxy.ts`
@@ -199,6 +201,8 @@ Copy [templates/RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) → e.g.
 
 Uses `useModal` from Para for **Connect** / **Disconnect** and `useSbcRadiusPara` for smart account + test send.
 
+After a successful `sendUserOperation`, capture `result.transactionHash` and show it in the UI with a link to the Radius block explorer (`chain.blockExplorers.default.url` + `/tx/{hash}`). Also link the smart account and SBC token contract (`/address/{address}`). See [reference.md](reference.md) — outer tx `from`/`to` is bundler → EntryPoint; the user's transfer appears under token transfers / smart account history.
+
 ### A8. Environment
 
 Append [templates/env.example.snippet](templates/env.example.snippet) to `.env.example`.
@@ -221,6 +225,8 @@ Create `.env.local` placeholders if missing; never commit real keys.
 Replace `base` / `baseSepolia` with `getRadiusChain()`.  
 AA URL slug: `radiusTestnet` or `radius`.  
 EntryPoint on Radius: `0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F` (AppKit handles when using `useSbcPara`).
+
+**Mainnet:** `@stablecoin.xyz/core` ≤ 1.6.2 ships `radius` with the wrong chain ID (723 instead of **723487**). Unpatched SDK → `AA24 signature error` on UserOps. Custom `defineChain` with id 723487 → `Unsupported chain: Radius Network`. **Fix both:** (1) copy [templates/@stablecoin.xyz+core+1.6.2.patch](templates/@stablecoin.xyz+core+1.6.2.patch) to `patches/`, (2) `npm i -D patch-package && npx patch-package`, (3) add `"postinstall": "patch-package"` to `package.json`, (4) use SDK exports in `radius.ts` (template already does). Run this whenever `NEXT_PUBLIC_SBC_CHAIN=radius`. Details: [reference.md](reference.md) → "Known SDK bug".
 
 ### A10. Verify
 
@@ -263,16 +269,18 @@ User sets SBC + Para keys in generated `.env`.
 
 ```
 - [ ] @stablecoin.xyz/react + core + viem + @getpara/* + @tanstack/react-query + wagmi + turnkey peers
-- [ ] src/config/radius.ts
+- [ ] src/config/radius.ts (SDK `radius` / `radiusTestnet` exports — not custom defineChain)
 - [ ] para-config.ts exports EXTERNAL_WALLETS, WALLETCONNECT_PROJECT_ID, authLayout EXTERNAL:FULL
 - [ ] ParaProviders: externalWalletConfig wired + @getpara/react-sdk/styles.css
 - [ ] use-para-viem-radius: walletClient.chain fallback + external wallet path (wagmi) + usePara export
 - [ ] radius-rpc-proxy.ts + /api/radius-rpc (+ optional /api/radius-rpc/health)
 - [ ] getRadiusRpcUrl: stable SSR (no window); optional NEXT_PUBLIC_RADIUS_RPC_URL fallback
 - [ ] use-sbc-radius-para: toSbcWalletClient (omit request) + signViaParaViem + normalizeSignatureToRSV + paraViemClients always object
-- [ ] Connect UI (useModal + smart account display)
+- [ ] Connect UI (useModal + smart account display + tx hash + Radius explorer links)
 - [ ] .env.example with SBC + Para keys (+ optional WALLETCONNECT_PROJECT_ID)
 - [ ] No canonical Base EntryPoint on Radius paths
+- [ ] Mainnet only: @stablecoin.xyz+core patch in patches/ + patch-package postinstall (chain ID 723487)
+- [ ] Env flip safe: getRadiusChain throws if mainnet selected on unpatched core; rpc URL overrides validated via radiusUrlMatchesSelectedChain
 - [ ] build/tsc passes
 - [ ] User told: run on PORT 3003 (npm run dev -- -p 3003) + two API keys + Para connect + faucet
 ```
@@ -285,7 +293,7 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 
 | File | Purpose |
 | ---- | ------- |
-| [radius-chain.ts](templates/radius-chain.ts) | viem Radius chains + getRadiusRpcUrl |
+| [radius-chain.ts](templates/radius-chain.ts) | SDK Radius chains + getRadiusRpcUrl |
 | [radius-rpc-proxy.ts](templates/radius-rpc-proxy.ts) | Shared server RPC proxy helpers |
 | [api/radius-rpc/route.ts](templates/api/radius-rpc/route.ts) | Next.js RPC proxy |
 | [api/radius-rpc/health/route.ts](templates/api/radius-rpc/health/route.ts) | Optional RPC health check |
@@ -293,10 +301,11 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 | [use-para-viem-radius.ts](templates/use-para-viem-radius.ts) | Para → viem clients on Radius |
 | [use-sbc-radius-para.ts](templates/use-sbc-radius-para.ts) | `useSbcPara` wrapper |
 | [ParaProviders-next.tsx](templates/ParaProviders-next.tsx) | QueryClient + ParaProvider |
-| [RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) | Connect + test send |
+| [RadiusParaConnect.tsx](templates/RadiusParaConnect.tsx) | Connect + test send + tx hash + explorer links |
 | [RadiusParaConnectLoader.tsx](templates/RadiusParaConnectLoader.tsx) | Next.js dynamic loader |
 | [env.example.snippet](templates/env.example.snippet) | Env vars |
 | [direct-aa-url.ts](templates/direct-aa-url.ts) | Non-Para AA URL |
+| [@stablecoin.xyz+core+1.6.2.patch](templates/@stablecoin.xyz+core+1.6.2.patch) | patch-package fix for SDK mainnet chain ID (723 → 723487) |
 
 ## Bundled docs files
 
@@ -323,7 +332,9 @@ See [reference.md](reference.md): custom EntryPoint, legacy gas, `rad_getBalance
 - ALWAYS read the correct template files before implementing — do not reconstruct from memory.
 - ALWAYS search [sbc-llms-full.txt](sbc-llms-full.txt) (or fetch https://docs.stablecoin.xyz/llms-full.txt) for SDK/API details — do not rely on training data alone.
 - ALWAYS use `getRadiusChain()` / `getRadiusRpcUrl()` from `radius.ts`; never hardcode chain ID or RPC URL.
+- ALWAYS use SDK `radius` / `radiusTestnet` exports in `radius.ts` (template) — never a custom `defineChain` named `Radius Network` on mainnet; it fails AppKit `CHAIN_CONFIGS` lookup.
 - ALWAYS use the custom Radius EntryPoint (`0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`) — not the canonical Base v0.7 EntryPoint.
+- ALWAYS apply the bundled `@stablecoin.xyz+core` patch (templates) before targeting **mainnet** with core ≤ 1.6.2 — the SDK's `radius.id` is 723 but the real chain ID is 723487, causing `AA24 signature error` on every mainnet UserOp (testnet unaffected). If AA24 appears on mainnet only, fix the chain ID — do not rework signing.
 - ALWAYS set `maxPriorityFeePerGas === maxFeePerGas` in UserOperations (Radius does not support EIP-1559); AppKit 1.6.1+ handles this automatically.
 - ALWAYS use `usePara()` (not `useParaViemRadius()` directly) in `use-sbc-radius-para.ts` — it handles both embedded and external wallet paths.
 - ALWAYS pass `paraViemClients` as an object to `useSbcPara` — never `null`; passing null causes AppKit to skip initialization on first render.

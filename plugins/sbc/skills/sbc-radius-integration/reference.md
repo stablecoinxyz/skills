@@ -59,7 +59,7 @@ Bundler URL === Paymaster URL (same endpoint).
 | Network | Decimal | Hex |
 |---------|---------|-----|
 | Testnet | 72344 | `0x11A98` |
-| Mainnet | 723487 | `0xB0EEF` |
+| Mainnet | 723487 | `0xB0A1F` |
 
 ## Why Radius vs Base
 
@@ -72,37 +72,28 @@ Bundler URL === Paymaster URL (same endpoint).
 
 ## Chain configuration (viem)
 
-### Mainnet (chain id 723487)
+**Use SDK exports** in `src/config/radius.ts` (see [templates/radius-chain.ts](templates/radius-chain.ts)). AppKit looks up chains by `chain.id` in `CHAIN_CONFIGS` — custom `defineChain` objects drift from the SDK and cause `Unsupported chain` on mainnet.
 
 ```typescript
-const radiusMainnet = {
-  id: 723487,
-  name: 'Radius Network',
-  nativeCurrency: { name: 'RUSD', symbol: 'RUSD', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://rpc.radiustech.xyz'] },
-  },
-  blockExplorers: {
-    default: { name: 'Radius Explorer', url: 'https://network.radiustech.xyz' },
-  },
-} as const
+import { radius as radiusMainnet, radiusTestnet } from '@stablecoin.xyz/core'
+
+export { radiusMainnet, radiusTestnet }
 ```
 
-### Testnet (chain id 72344)
+| Network | SDK export | Chain ID | SDK `name` (must match) |
+| ------- | ---------- | -------- | ----------------------- |
+| Mainnet | `radius` | 723487 (after patch) | `Radius` |
+| Testnet | `radiusTestnet` | 72344 | `Radius Testnet` |
 
-```typescript
-const radiusTestnet = {
-  id: 72344,
-  name: 'Radius Testnet',
-  nativeCurrency: { name: 'RUSD', symbol: 'RUSD', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://rpc.testnet.radiustech.xyz'] },
-  },
-  blockExplorers: {
-    default: { name: 'Radius Explorer', url: 'https://testnet.radiustech.xyz' },
-  },
-  testnet: true,
-} as const
+Do **not** use a custom mainnet chain named `Radius Network` — that name is not in `CHAIN_CONFIGS`.
+
+### MetaMask (mainnet)
+
+```
+Network Name: Radius Network
+RPC URL: https://rpc.radiustech.xyz
+Chain ID: 723487
+Currency Symbol: RUSD
 ```
 
 ### MetaMask (testnet)
@@ -115,6 +106,40 @@ Currency Symbol: RUSD
 ```
 
 Faucet: https://testnet.radiustech.xyz/wallet
+
+## Block explorer (Radius Dashboard)
+
+| Network | Explorer |
+| ------- | -------- |
+| Testnet | https://testnet.radiustech.xyz |
+| Mainnet | https://network.radiustech.xyz |
+
+URL patterns: `/tx/{transactionHash}`, `/address/{address}`.
+
+**Gasless UserOp txs:** the outer transaction shows **bundler → EntryPoint** (`0xfA15FF1e8e3a66737fb161e4f9Fa8935daD7B04F`), not the user's EOA/smart account. The SBC ERC-20 transfer is inside the UserOp — view it on the tx page under **token transfers** or on the **smart account** address page. `RadiusParaConnect` links both after send.
+
+## Known SDK bug: mainnet chain ID (`@stablecoin.xyz/core` ≤ 1.6.2)
+
+The SDK's `radius` export ships `id: 723`, but Radius mainnet's real chain ID is **723487** (`0xB0A1F` — SBC's own mainnet bundler returns it for `eth_chainId`). On mainnet only, both wiring options fail:
+
+- Pass the SDK `radius` chain → every UserOp fails **`AA24 signature error`**: the client signs the userOpHash with chainId 723 while the EntryPoint hashes with `block.chainid` 723487.
+- Pass a custom `defineChain` (id 723487, name `Radius Network`) → AppKit init throws **`Unsupported chain: Radius Network`** (`CHAIN_CONFIGS` is keyed by unpatched id **723**, name **`Radius`**).
+
+Testnet works either way (72344 is correct in the SDK), which makes the AA24 look like a Para signing bug. It is not — do **not** change signature normalization for this; signatures recover correctly to the owner over the chainId-723 hash.
+
+**Note on the error output:** the paymaster shown in a mainnet AA24 error (e.g. `0xeAe0528e…`, listed under testnet contracts below) is **not** evidence that the request was routed to the testnet bundler. Endpoint routing is `CHAIN_CONFIGS.get(chain.id).idString` — both the unpatched id 723 and the patched 723487 map to the `radius` (mainnet) endpoint, and there is no code path that hits the testnet endpoint when `NEXT_PUBLIC_SBC_CHAIN=radius`. Fix the chain ID; do not chase routing.
+
+**Fix (until SBC ships a corrected release) — patch the SDK dist with patch-package:**
+
+1. Copy the bundled [templates/@stablecoin.xyz+core+1.6.2.patch](templates/@stablecoin.xyz+core+1.6.2.patch) into `patches/` at the project root (exact filename matters to patch-package).
+2. `npm i -D patch-package && npx patch-package` (applies it), and add `"postinstall": "patch-package"` to package.json `scripts`.
+3. After patching, use the template [radius-chain.ts](templates/radius-chain.ts) which imports `radius` and `radiusTestnet` from `@stablecoin.xyz/core` — **do not** keep a parallel custom `defineChain`.
+
+For a core version other than 1.6.2, regenerate: in `node_modules/@stablecoin.xyz/core/dist/index.js` **and** `index.esm.js`, replace `id: 723,` → `id: 723487,` (2× each: `defineChain` + `CHAIN_CONFIGS` entry) and `this.config.chain.id === 723;` → `... === 723487;` (3× each: `isRadius` checks), then `npx patch-package @stablecoin.xyz/core`.
+
+Remove the patch once an SBC release ships `radius.id === 723487`.
+
+**Fail-fast guard:** [templates/radius-chain.ts](templates/radius-chain.ts) throws at init when mainnet is selected but `radius.id` is still 723 (patch missing — e.g. fresh install without `postinstall`), with instructions, instead of failing later with AA24 at send time. It also exports `radiusUrlMatchesSelectedChain()`, used by `getRadiusRpcUrl()` and the proxy to ignore (with a console warning) a `NEXT_PUBLIC_RADIUS_RPC_URL` / `RADIUS_RPC_UPSTREAM` override that points at the other Radius network after a chain flip — so switching `NEXT_PUBLIC_SBC_CHAIN` alone always yields a consistent chain + RPC + bundler.
 
 ## EntryPoint (critical)
 
@@ -230,7 +255,11 @@ await sendUserOperation({
 | -------- | ------------- | --- |
 | `/api/radius-rpc` 403, setup banner | Cloudflare blocks server egress | `NEXT_PUBLIC_RADIUS_RPC_URL=https://rpc.testnet.radiustech.xyz/YOUR_KEY` in `.env.local`, restart `npm run dev -- -p 3003` |
 | `address is required` on connect | `toOwner()` called `eth_accounts` via Para `request` | `toSbcWalletClient` — spread Para client but omit `request` |
-| AA24 / signature validation failed | UserOp signed via EIP-191 `signMessageAsync` | `signViaParaViem` — `paraWalletClient.signMessage` + RSV normalization |
+| AA24 / signature validation failed (both networks) | UserOp signed via EIP-191 `signMessageAsync` | `signViaParaViem` — `paraWalletClient.signMessage` + RSV normalization |
+| AA24 on **mainnet only** (testnet works, signature recovers to owner) | SDK `radius.id` 723 ≠ real chain ID 723487 | Patch `@stablecoin.xyz/core` — see "Known SDK bug" above. Do not touch signing code |
+| `Unsupported chain: Radius Network` at AppKit init | Custom `defineChain` (id 723487 / name `Radius Network`) not in `CHAIN_CONFIGS` (keyed by 723, name `Radius`) | Apply patch + switch to SDK exports in [radius-chain.ts](templates/radius-chain.ts); remove custom `defineChain` |
+| `@stablecoin.xyz/core is unpatched` thrown at init | Mainnet selected but the patch is not applied (fresh install, missing `postinstall`) | Re-copy the patch to `patches/` and run `npx patch-package`; keep `"postinstall": "patch-package"` |
+| Wrong balances / nonces / receipts after flipping `NEXT_PUBLIC_SBC_CHAIN` | `NEXT_PUBLIC_RADIUS_RPC_URL` or `RADIUS_RPC_UPSTREAM` still points at the other network's RPC | Update or remove the override; `radiusUrlMatchesSelectedChain()` already ignores mismatched radiustech.xyz URLs (see console warning) |
 | Hydration warning on `<html>` | Browser extension attributes | `suppressHydrationWarning` on `<html>` / `<body>` in root layout (not Radius-specific) |
 | Para modal blocked | Wrong dev port | `npm run dev -- -p 3003` only |
 

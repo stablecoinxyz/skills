@@ -8,6 +8,8 @@
  *  - Disconnect calls para.logout() (Para SDK) + disconnectWallet() (AppKit)
  *  - Test send transfers SBC ERC-20 (not native RUSD value)
  *  - Shows smart account address + live SBC balance
+ *  - Links to Radius explorer (smart account, SBC token, tx hash after send)
+ *  - Displays result.transactionHash after successful sendUserOperation
  */
 import { useModal, useAccount, useClient } from "@getpara/react-sdk";
 import { useState, useEffect, useCallback } from "react";
@@ -17,6 +19,14 @@ import { useSbcRadiusPara } from "@/lib/sbc/use-sbc-radius-para";
 // SBC token on Radius testnet + mainnet (same address, 6 decimals)
 const SBC_TOKEN = "0x33ad9e4BD16B69B5BFdED37D8B5D9fF9aba014Fb" as const;
 const SBC_DECIMALS = 6;
+
+function explorerAddressUrl(explorerBase: string, address: string) {
+  return `${explorerBase.replace(/\/$/, "")}/address/${address}`;
+}
+
+function explorerTxUrl(explorerBase: string, txHash: string) {
+  return `${explorerBase.replace(/\/$/, "")}/tx/${txHash}`;
+}
 
 export default function RadiusParaConnect() {
   const sbcKey =
@@ -49,11 +59,13 @@ export default function RadiusParaConnect() {
   } = useSbcRadiusPara();
 
   const [txStatus, setTxStatus] = useState<string | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sbcBalance, setSbcBalance] = useState<string | null>(null);
 
-  // Fetch SBC balance whenever smart account address is available
+  const explorerBase = chain.blockExplorers?.default?.url ?? "https://testnet.radiustech.xyz";
+
   const fetchBalance = useCallback(async () => {
     if (!account?.address || !publicClient) return;
     try {
@@ -73,7 +85,6 @@ export default function RadiusParaConnect() {
     fetchBalance();
   }, [fetchBalance]);
 
-  // Disconnect: Para logout + AppKit cleanup
   const handleDisconnect = async () => {
     try {
       await para?.logout();
@@ -83,23 +94,24 @@ export default function RadiusParaConnect() {
     disconnectWallet();
   };
 
-  // Test send: gasless SBC ERC-20 self-transfer of 0.000001 SBC (1 micro-SBC)
   const handleTestSend = async () => {
     if (!sbcAppKit || !account?.address) return;
     setSending(true);
     setTxError(null);
     setTxStatus(null);
+    setTxHash(null);
     try {
       const data = encodeFunctionData({
         abi: erc20Abi,
         functionName: "transfer",
         args: [account.address as `0x${string}`, parseUnits("0.000001", SBC_DECIMALS)],
       });
-      await sbcAppKit.sendUserOperation({
+      const result = await sbcAppKit.sendUserOperation({
         to: SBC_TOKEN,
         value: "0",
         data,
       });
+      setTxHash(result.transactionHash);
       setTxStatus("SBC transfer submitted");
       await fetchBalance();
     } catch (e) {
@@ -125,7 +137,6 @@ export default function RadiusParaConnect() {
         </button>
       ) : (
         <div className="space-y-3">
-          {/* Account info */}
           {account?.address && (
             <div className="space-y-1">
               {ownerAddress && (
@@ -140,10 +151,28 @@ export default function RadiusParaConnect() {
                 SBC balance:{" "}
                 {sbcBalance !== null ? `${sbcBalance} SBC` : "loading…"}
               </p>
+              <p className="text-xs opacity-70">
+                <a
+                  href={explorerAddressUrl(explorerBase, account.address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  View smart account on Radius explorer
+                </a>
+                {" · "}
+                <a
+                  href={explorerAddressUrl(explorerBase, SBC_TOKEN)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  SBC token
+                </a>
+              </p>
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -168,7 +197,23 @@ export default function RadiusParaConnect() {
         <p className="text-xs text-red-600">{error.message}</p>
       )}
       {txStatus && (
-        <p className="text-xs text-green-700">{txStatus}</p>
+        <div className="space-y-2 rounded border border-green-200 bg-green-50/50 p-3 text-xs text-green-800">
+          <p>{txStatus}</p>
+          {txHash && (
+            <div className="space-y-1">
+              <p className="font-medium">Transaction hash</p>
+              <p className="break-all font-mono opacity-90">{txHash}</p>
+              <a
+                href={explorerTxUrl(explorerBase, txHash)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block underline underline-offset-2"
+              >
+                View on Radius explorer →
+              </a>
+            </div>
+          )}
+        </div>
       )}
       {txError && (
         <p className="text-xs text-red-600">{txError}</p>
