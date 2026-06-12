@@ -72,37 +72,28 @@ Bundler URL === Paymaster URL (same endpoint).
 
 ## Chain configuration (viem)
 
-### Mainnet (chain id 723487)
+**Use SDK exports** in `src/config/radius.ts` (see [templates/radius-chain.ts](templates/radius-chain.ts)). AppKit looks up chains by `chain.id` in `CHAIN_CONFIGS` — custom `defineChain` objects drift from the SDK and cause `Unsupported chain` on mainnet.
 
 ```typescript
-const radiusMainnet = {
-  id: 723487,
-  name: 'Radius Network',
-  nativeCurrency: { name: 'RUSD', symbol: 'RUSD', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://rpc.radiustech.xyz'] },
-  },
-  blockExplorers: {
-    default: { name: 'Radius Explorer', url: 'https://network.radiustech.xyz' },
-  },
-} as const
+import { radius as radiusMainnet, radiusTestnet } from '@stablecoin.xyz/core'
+
+export { radiusMainnet, radiusTestnet }
 ```
 
-### Testnet (chain id 72344)
+| Network | SDK export | Chain ID | SDK `name` (must match) |
+| ------- | ---------- | -------- | ----------------------- |
+| Mainnet | `radius` | 723487 (after patch) | `Radius` |
+| Testnet | `radiusTestnet` | 72344 | `Radius Testnet` |
 
-```typescript
-const radiusTestnet = {
-  id: 72344,
-  name: 'Radius Testnet',
-  nativeCurrency: { name: 'RUSD', symbol: 'RUSD', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://rpc.testnet.radiustech.xyz'] },
-  },
-  blockExplorers: {
-    default: { name: 'Radius Explorer', url: 'https://testnet.radiustech.xyz' },
-  },
-  testnet: true,
-} as const
+Do **not** use a custom mainnet chain named `Radius Network` — that name is not in `CHAIN_CONFIGS`.
+
+### MetaMask (mainnet)
+
+```
+Network Name: Radius Network
+RPC URL: https://rpc.radiustech.xyz
+Chain ID: 723487
+Currency Symbol: RUSD
 ```
 
 ### MetaMask (testnet)
@@ -132,7 +123,7 @@ URL patterns: `/tx/{transactionHash}`, `/address/{address}`.
 The SDK's `radius` export ships `id: 723`, but Radius mainnet's real chain ID is **723487** (`0xB0A1F` — SBC's own mainnet bundler returns it for `eth_chainId`). On mainnet only, both wiring options fail:
 
 - Pass the SDK `radius` chain → every UserOp fails **`AA24 signature error`**: the client signs the userOpHash with chainId 723 while the EntryPoint hashes with `block.chainid` 723487.
-- Pass a correct custom chain (id 723487, e.g. from [templates/radius-chain.ts](templates/radius-chain.ts)) → AppKit init throws **`Unsupported chain`** (internal `CHAIN_CONFIGS` map is keyed by 723).
+- Pass a custom `defineChain` (id 723487, name `Radius Network`) → AppKit init throws **`Unsupported chain: Radius Network`** (`CHAIN_CONFIGS` is keyed by unpatched id **723**, name **`Radius`**).
 
 Testnet works either way (72344 is correct in the SDK), which makes the AA24 look like a Para signing bug. It is not — do **not** change signature normalization for this; signatures recover correctly to the owner over the chainId-723 hash.
 
@@ -140,7 +131,7 @@ Testnet works either way (72344 is correct in the SDK), which makes the AA24 loo
 
 1. Copy the bundled [templates/@stablecoin.xyz+core+1.6.2.patch](templates/@stablecoin.xyz+core+1.6.2.patch) into `patches/` at the project root (exact filename matters to patch-package).
 2. `npm i -D patch-package && npx patch-package` (applies it), and add `"postinstall": "patch-package"` to package.json `scripts`.
-3. After patching, import the chain from the SDK (`radius` from `@stablecoin.xyz/core`) **or** keep the template chain — both then agree on 723487.
+3. After patching, use the template [radius-chain.ts](templates/radius-chain.ts) which imports `radius` and `radiusTestnet` from `@stablecoin.xyz/core` — **do not** keep a parallel custom `defineChain`.
 
 For a core version other than 1.6.2, regenerate: in `node_modules/@stablecoin.xyz/core/dist/index.js` **and** `index.esm.js`, replace `id: 723,` → `id: 723487,` (2× each: `defineChain` + `CHAIN_CONFIGS` entry) and `this.config.chain.id === 723;` → `... === 723487;` (3× each: `isRadius` checks), then `npx patch-package @stablecoin.xyz/core`.
 
@@ -262,7 +253,7 @@ await sendUserOperation({
 | `address is required` on connect | `toOwner()` called `eth_accounts` via Para `request` | `toSbcWalletClient` — spread Para client but omit `request` |
 | AA24 / signature validation failed (both networks) | UserOp signed via EIP-191 `signMessageAsync` | `signViaParaViem` — `paraWalletClient.signMessage` + RSV normalization |
 | AA24 on **mainnet only** (testnet works, signature recovers to owner) | SDK `radius.id` 723 ≠ real chain ID 723487 | Patch `@stablecoin.xyz/core` — see "Known SDK bug" above. Do not touch signing code |
-| `Unsupported chain: Radius Network` at AppKit init | Custom chain id 723487 not in SDK `CHAIN_CONFIGS` (keyed by 723) | Same patch — then SDK `radius` export and custom chain both work |
+| `Unsupported chain: Radius Network` at AppKit init | Custom `defineChain` (id 723487 / name `Radius Network`) not in `CHAIN_CONFIGS` (keyed by 723, name `Radius`) | Apply patch + switch to SDK exports in [radius-chain.ts](templates/radius-chain.ts); remove custom `defineChain` |
 | Hydration warning on `<html>` | Browser extension attributes | `suppressHydrationWarning` on `<html>` / `<body>` in root layout (not Radius-specific) |
 | Para modal blocked | Wrong dev port | `npm run dev -- -p 3003` only |
 

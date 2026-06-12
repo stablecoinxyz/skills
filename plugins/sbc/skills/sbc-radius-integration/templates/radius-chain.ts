@@ -1,33 +1,13 @@
 /**
  * Radius viem chains — copy to src/config/radius.ts
  * https://docs.stablecoin.xyz/radius/configuration
+ *
+ * Use SDK exports so AppKit CHAIN_CONFIGS lookup matches (by chain.id).
+ * Mainnet requires @stablecoin.xyz/core patch (723 → 723487) — see templates patch + SKILL.md A9.
  */
-import { defineChain } from "viem";
+import { radius as radiusMainnet, radiusTestnet } from "@stablecoin.xyz/core";
 
-export const radiusMainnet = defineChain({
-  id: 723487,
-  name: "Radius Network",
-  nativeCurrency: { name: "RUSD", symbol: "RUSD", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc.radiustech.xyz"] } },
-  blockExplorers: {
-    default: { name: "Radius Explorer", url: "https://network.radiustech.xyz" },
-  },
-});
-
-export const radiusTestnet = defineChain({
-  id: 72344,
-  name: "Radius Testnet",
-  nativeCurrency: { name: "RUSD", symbol: "RUSD", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc.testnet.radiustech.xyz"] } },
-  blockExplorers: {
-    default: {
-      name: "Radius Explorer",
-      url: "https://testnet.radiustech.xyz",
-      apiUrl: "https://testnet.radiustech.xyz/api",
-    },
-  },
-  testnet: true,
-});
+export { radiusMainnet, radiusTestnet };
 
 export function getRadiusChain() {
   const env =
