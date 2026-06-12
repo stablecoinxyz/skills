@@ -1,0 +1,98 @@
+diff --git a/node_modules/@stablecoin.xyz/core/dist/index.esm.js b/node_modules/@stablecoin.xyz/core/dist/index.esm.js
+index a9a1a38..bdf9a09 100644
+--- a/node_modules/@stablecoin.xyz/core/dist/index.esm.js
++++ b/node_modules/@stablecoin.xyz/core/dist/index.esm.js
+@@ -13488,7 +13488,7 @@ const radiusTestnet = defineChain$1({
+   testnet: true
+ });
+ const radius = defineChain$1({
+-  id: 723,
++  id: 723487,
+   name: "Radius",
+   nativeCurrency: {
+     name: "RUSD",
+@@ -14016,7 +14016,7 @@ const CHAIN_CONFIGS = /* @__PURE__ */ new Map([
+     blockExplorerUrl: "https://testnet.radiustech.xyz"
+   }],
+   [radius.id, {
+-    id: 723,
++    id: 723487,
+     name: "Radius",
+     idString: "radius",
+     rpcUrl: "https://rpc.radiustech.xyz",
+@@ -14773,7 +14773,7 @@ class SbcAppKit {
+     this.logInfo("walletClient", this.walletClient);
+     try {
+       this.logInfo("initializing_smart_account_client");
+-      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723;
++      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723487;
+       this.logInfo("chain_detection", {
+         chainId: this.config.chain.id,
+         chainName: this.config.chain.name,
+@@ -14915,7 +14915,7 @@ class SbcAppKit {
+       const smartAccountClient = await this.initializeSmartAccountClient();
+       const calls = this.normalizeToCalls(params);
+       this.logInfo("normalized_calls", { callsCount: calls.length });
+-      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723;
++      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723487;
+       const gasLimits = isRadius ? {
+         callGasLimit: 300000n,
+         verificationGasLimit: 300000n,
+@@ -15106,7 +15106,7 @@ class SbcAppKit {
+       }
+       const calls = this.normalizeToCalls(params);
+       this.logInfo("prepared_calls_for_estimation", { callsCount: calls.length });
+-      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723;
++      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723487;
+       const gasLimits = isRadius ? {
+         callGasLimit: 300000n,
+         verificationGasLimit: 300000n,
+diff --git a/node_modules/@stablecoin.xyz/core/dist/index.js b/node_modules/@stablecoin.xyz/core/dist/index.js
+index 3ce9c4c..f6f94ff 100644
+--- a/node_modules/@stablecoin.xyz/core/dist/index.js
++++ b/node_modules/@stablecoin.xyz/core/dist/index.js
+@@ -13490,7 +13490,7 @@ const radiusTestnet = viem.defineChain({
+   testnet: true
+ });
+ const radius = viem.defineChain({
+-  id: 723,
++  id: 723487,
+   name: "Radius",
+   nativeCurrency: {
+     name: "RUSD",
+@@ -14018,7 +14018,7 @@ const CHAIN_CONFIGS = /* @__PURE__ */ new Map([
+     blockExplorerUrl: "https://testnet.radiustech.xyz"
+   }],
+   [radius.id, {
+-    id: 723,
++    id: 723487,
+     name: "Radius",
+     idString: "radius",
+     rpcUrl: "https://rpc.radiustech.xyz",
+@@ -14775,7 +14775,7 @@ class SbcAppKit {
+     this.logInfo("walletClient", this.walletClient);
+     try {
+       this.logInfo("initializing_smart_account_client");
+-      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723;
++      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723487;
+       this.logInfo("chain_detection", {
+         chainId: this.config.chain.id,
+         chainName: this.config.chain.name,
+@@ -14917,7 +14917,7 @@ class SbcAppKit {
+       const smartAccountClient = await this.initializeSmartAccountClient();
+       const calls = this.normalizeToCalls(params);
+       this.logInfo("normalized_calls", { callsCount: calls.length });
+-      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723;
++      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723487;
+       const gasLimits = isRadius ? {
+         callGasLimit: 300000n,
+         verificationGasLimit: 300000n,
+@@ -15108,7 +15108,7 @@ class SbcAppKit {
+       }
+       const calls = this.normalizeToCalls(params);
+       this.logInfo("prepared_calls_for_estimation", { callsCount: calls.length });
+-      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723;
++      const isRadius = this.config.chain.id === 72344 || this.config.chain.id === 723487;
+       const gasLimits = isRadius ? {
+         callGasLimit: 300000n,
+         verificationGasLimit: 300000n,
